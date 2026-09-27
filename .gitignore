@@ -1,0 +1,16 @@
+# Build outputs
+dist/
+bin/
+obj/
+*.user
+.vs/
+TestResults/
+
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/.idea/
+android/.kotlin/
+*.iml

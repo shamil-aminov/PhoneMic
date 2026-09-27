@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PhoneMic</string>
+    <string name="channel_name">Микрофон</string>
+    <string name="notification_title">Микрофон включён</string>
+    <string name="turn_off">Выключить</string>
+    <string name="mic_permission_needed">Без доступа к микрофону приложение не может работать</string>
+    <string name="not_a_phonemic_code">Это не QR-код PhoneMic</string>
+    <string name="scanner_failed">Не удалось открыть сканер QR-кодов</string>
+    <string name="paired_with">Компьютер «%1$s» сохранён</string>
+</resources>
