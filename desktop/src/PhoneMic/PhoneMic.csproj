@@ -8,7 +8,10 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
-    <Version>0.1.0</Version>
+    <Version>1.0.0</Version>
+    <Authors>Shamil Aminov</Authors>
+    <Copyright>Copyright (c) 2026 Shamil Aminov</Copyright>
+    <Description>Use an Android phone as a Windows microphone</Description>
     <Product>PhoneMic</Product>
     <!-- The Fluent theme (ThemeMode) is still marked experimental. -->
     <NoWarn>$(NoWarn);WPF0001</NoWarn>

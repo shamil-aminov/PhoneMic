@@ -1,93 +1,208 @@
 # PhoneMic
 
-Телефон на Android в роли микрофона для Windows. По Wi-Fi или по USB-кабелю,
-с сопряжением через QR-код.
+**Your Android phone as a microphone for Windows — over Wi-Fi or a USB cable.**
 
-* **Программа для ПК** показывает QR-код, принимает звук и выводит его в
-  VB-Audio Virtual Cable. Discord, Zoom, OBS и другие программы видят его как
-  микрофон «CABLE Output».
-* **Приложение для телефона** — одна большая кнопка. Микрофон работает в
-  фоне и при выключенном экране, а если связь пропала, подключается заново сам.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![CI](https://github.com/shamil-aminov/PhoneMic/actions/workflows/ci.yml/badge.svg)](https://github.com/shamil-aminov/PhoneMic/actions/workflows/ci.yml)
 
-## Установка
+*Русская версия: [README.ru.md](README.ru.md)*
 
-1. Установите [VB-Audio Virtual Cable](https://vb-audio.com/Cable/) (бесплатно).
-2. Запустите `dist/windows/PhoneMic.exe`. Нужен .NET 10 Desktop Runtime.
-   Когда Windows спросит про доступ к сети, разрешите его, иначе Wi-Fi работать не будет.
-3. Установите на телефон `dist/android/PhoneMic.apk`.
-4. В приложении на телефоне нажмите «Сканировать» и наведите камеру на QR-код
-   в окне на ПК. Сопряжение делается один раз.
-5. В Discord, Zoom и т. п. выберите микрофон **CABLE Output**.
+![The phone app and the PC app while streaming](docs/images/cover.png)
 
-## Подключение
+---
 
-* **Wi-Fi.** Телефон ищет ПК по адресам из QR-кода, а если ПК сменил адрес,
-  находит его широковещательным запросом.
-* **USB.** Если на телефоне включена отладка по USB, а на ПК есть adb (Android
-  Studio или platform-tools), программа сама делает `adb reverse`. Телефон,
-  подключённый кабелем, выбирает USB автоматически: так задержка минимальна и
-  нет зависимости от Wi-Fi.
-* **Переключение на ходу.** Выдернули кабель — телефон сразу переходит на
-  Wi-Fi. Подключили обратно — через несколько секунд возвращается на USB
-  (ждёт, чтобы кабель держался стабильно, а не дёргался). Микрофон при этом
-  не выключается, обрыв звука — десятки миллисекунд.
+PhoneMic streams your phone's microphone to your PC, where Discord, Zoom, OBS
+and every other program see it as an ordinary microphone. You pair once by
+scanning a QR code, and from then on it is one button on the phone.
 
-## Режимы буфера
+It exists because the apps that already do this tend to fail in the same two
+ways: the connection drops after a while, and getting it going is fiddly.
+PhoneMic is built around not doing either.
 
-| Режим | Задержка | Когда |
-|---|---|---|
-| Мин. задержка | 20–40 мс | USB, отличный Wi-Fi |
-| Баланс | подстраивается, обычно 50–100 мс | почти всегда |
-| Надёжный | 100–150 мс | плохой или загруженный Wi-Fi |
+## Features
 
-Буфер измеряет разброс задержек сети и держит ровно столько звука, сколько
-нужно. Излишек убирает, пропуская паузы в речи. Нехватку добирает, растягивая
-паузы. Поэтому подстройка на слух незаметна.
+- **One-time pairing by QR code.** The phone remembers the PC and finds it
+  again even if its IP address changes.
+- **Wi-Fi or USB, picked automatically.** With USB debugging on, the PC sets
+  up the cable link by itself. Pull the cable and the phone moves to Wi-Fi at
+  once; plug it back in and it returns to USB a few seconds later. The
+  microphone never switches off in between.
+- **Keeps going with the screen off.** A foreground service, a wake lock and
+  Wi-Fi locks stop Android from muting the app or letting the radio doze.
+- **Reconnects by itself** after any dropout, on either side.
+- **An adaptive jitter buffer** that measures the network and holds exactly
+  as much audio as it needs, in one of three modes (see below).
+- **A tray app** on the PC with a level meter, volume, device choice and
+  optional start with Windows.
+- **Local only.** No account, no cloud, no analytics. Audio goes straight from
+  the phone to the PC.
 
-## Если что-то не так
+## How it works
 
-* **Щелчки по Wi-Fi.** Подключите телефон к сети 5 ГГц вместо 2,4 ГГц,
-  переключите буфер в «Надёжный» или используйте USB.
-* **Нет подключения по Wi-Fi.** Проверьте, что ПК и телефон в одной сети и что
-  брандмауэр Windows пропускает PhoneMic.exe (входящие UDP и TCP, порт 50505).
-* **«Не удалось открыть микрофон».** Включайте микрофон, когда телефон
-  разблокирован. После этого экран можно гасить. Ещё микрофон может быть занят
-  звонком.
-* **Журнал** открывается ссылкой «Открыть журнал» в окне программы
-  (`%APPDATA%\PhoneMic\log.txt`). Раз в 10 секунд туда пишется статистика
-  задержек сети.
-
-## Устройство проекта
-
-```
-android/                 приложение для телефона (Kotlin, Jetpack Compose)
-desktop/src/PhoneMic.Core  протокол, сервер, jitter-буфер, вывод звука (C#, NAudio)
-desktop/src/PhoneMic       окно, QR-код, трей (WPF, .NET 10)
-desktop/tests              тесты протокола и симуляция сети для буфера
-desktop/tools/PhoneMic.Probe  утилита для сквозной проверки без человека
-docs/protocol.md         описание сетевого протокола
+```mermaid
+flowchart LR
+    A["🎤 Phone mic<br/>48 kHz mono"] --> B["10 ms packets"]
+    B -->|"Wi-Fi: UDP"| D["PhoneMic.exe<br/>jitter buffer"]
+    B -->|"USB: TCP via adb reverse"| D
+    D --> E["CABLE Input"]
+    E -. "VB-Audio<br/>Virtual Cable" .-> F["CABLE Output"]
+    F --> G["Discord, Zoom, OBS…"]
 ```
 
-### Сборка
+Windows cannot turn a program's output into a microphone without a driver, so
+PhoneMic plays the audio into [VB-Audio Virtual Cable](https://vb-audio.com/Cable/),
+a free and widely used virtual audio device. Its other end, **CABLE Output**,
+is the microphone you pick in other programs.
+
+## Requirements
+
+- **PC:** Windows 10 or 11, 64-bit, and
+  [VB-Audio Virtual Cable](https://vb-audio.com/Cable/).
+- **Phone:** Android 8.0 or newer, with Google Play services for the built-in
+  QR scanner.
+- **For Wi-Fi:** the phone and the PC on the same network.
+- **For USB (optional):** USB debugging enabled on the phone, and `adb` on the
+  PC — it comes with Android Studio or the
+  [platform tools](https://developer.android.com/tools/releases/platform-tools).
+
+Both apps are in Russian for now. The steps below name the buttons by what
+they do.
+
+## Getting started
+
+1. **Install VB-Audio Virtual Cable** and restart if its installer asks.
+2. **Download PhoneMic** from the [latest release](../../releases/latest):
+   the `.apk` for the phone and `PhoneMic-…-windows-x64.exe` for the PC.
+3. **Run the PC app.** When Windows asks whether PhoneMic may use the network,
+   allow it — Wi-Fi does not work otherwise. A QR code appears.
+
+   <img src="docs/images/pc-pairing.png" alt="The PC app waiting for a phone, with its pairing QR code" width="360">
+
+4. **Install the app on the phone**, tap **Scan** and point the camera at the
+   QR code.
+5. **Tap the big button.** It turns green once the PC is receiving.
+6. **In Discord, Zoom or OBS**, choose **CABLE Output** as the microphone.
+
+Closing the PC window hides it to the tray; the microphone keeps working.
+Quit from the tray icon's menu.
+
+## Connecting
+
+| | Wi-Fi | USB |
+| --- | --- | --- |
+| Setup | none | USB debugging on the phone, `adb` on the PC |
+| Typical latency | 50–100 ms | 30 ms |
+| Affected by a busy network | yes | no |
+| Charges the phone | no | yes |
+
+The phone always tries USB first. It finds the PC on Wi-Fi by trying every
+address in the QR code and, failing that, a broadcast, so a new IP from the
+router does not break pairing.
+
+## Buffer modes
+
+Wi-Fi delivers packets unevenly. The buffer on the PC measures how late packets
+arrive and keeps just enough audio to cover it. It absorbs the difference by
+skipping or stretching pauses in speech, which nobody can hear, and by adjusting
+playback speed by at most 1% when there are no pauses.
+
+| Mode | Latency | When |
+| --- | --- | --- |
+| Low latency | 20–40 ms | USB, or excellent Wi-Fi |
+| Balanced (default) | adapts, usually 50–100 ms | almost always |
+| Stable | 100–150 ms | a crowded or weak Wi-Fi network |
+
+## Troubleshooting
+
+**Clicks or gaps on Wi-Fi.** Connect the phone to a 5 GHz network rather than
+2.4 GHz, switch the buffer to *Stable*, or use USB. The log (below) records
+network jitter every 10 seconds, which shows how bad the network really is.
+
+**The phone does not connect over Wi-Fi.** Check that both devices are on the
+same network and that Windows Firewall allows PhoneMic.exe (UDP and TCP port
+50505). Networks with client isolation, such as many guest networks, block this
+entirely; use USB there.
+
+**"Could not open the microphone."** Android only grants the microphone to an
+app that is on screen when it starts recording. Turn PhoneMic on while the
+phone is unlocked; after that the screen can go off. A phone call also takes
+the microphone for its duration.
+
+**USB stops working while WO Mic is installed.** Some apps ship their own
+older copy of `adb`, and each copy restarts the other's server. PhoneMic
+recovers within three seconds, but closing the other app avoids the churn.
+
+**The log** is at `%APPDATA%\PhoneMic\log.txt`, and the *Open log* link in the
+PC window opens it.
+
+## Privacy and security
+
+PhoneMic talks only to the computer it is paired with, on the local network or
+over the USB cable. It has no servers and sends nothing anywhere else.
+
+Audio travels **unencrypted** across the local network. The pairing code in the
+QR keeps other devices from streaming into your microphone by accident; it is
+not protection against someone deliberately listening on your network. On a
+network you do not trust, use the USB cable.
+
+## Building
+
+Requirements: Android Studio (or JDK 21+ and the Android SDK) and the .NET 10
+SDK.
 
 ```bash
-# ПК
-dotnet publish desktop/src/PhoneMic -c Release -r win-x64 --self-contained false -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=none -o dist/windows
-# Телефон
-cd android && ./gradlew :app:assembleRelease
+# Phone app
+cd android
+./gradlew assembleDebug
+
+# PC app
+dotnet build desktop/PhoneMic.sln
+dotnet run --project desktop/src/PhoneMic
 ```
 
-### Проверка без человека
+Release builds, signing and publishing are described in
+[docs/RELEASING.md](docs/RELEASING.md).
 
-В приложении для телефона есть отладочный режим с тестовым тоном 1 кГц вместо
-микрофона:
+## Testing
+
+```bash
+cd android && ./gradlew test                  # protocol tests on the phone side
+dotnet test desktop/tests/PhoneMic.Core.Tests # protocol tests and network simulation on the PC side
+```
+
+Both sides check the same byte-exact packets, listed in
+[docs/protocol.md](docs/protocol.md#test-vectors), so a wire format change on
+one side fails the tests on the other. The jitter buffer is tested against a
+simulated network on a virtual clock: ten minutes of streaming over bad Wi-Fi,
+with clock drift, in a few seconds.
+
+For end-to-end checks without anyone speaking, the phone app has a debug mode
+that plays a 1 kHz tone instead of the microphone, and `probe` records what
+comes out of the virtual cable and reports frequency, level and dropouts:
 
 ```bash
 adb shell am start -n sh.aminov.phonemic/.MainActivity --ez autostart true --ez tone true
-probe record "CABLE Output" 10
+dotnet run --project desktop/tools/PhoneMic.Probe -- record "CABLE Output" 10
 adb shell am start -n sh.aminov.phonemic/.MainActivity --ez stop true
 ```
 
-`probe` записывает звук с CABLE Output и сообщает частоту, уровень и
-провалы. `--ez wifionly true` запрещает USB. `probe fakephone` и
-`probe listen` проверяют ПК и телефон по отдельности.
+## Project layout
+
+```
+android/                        Phone app: Kotlin, Jetpack Compose
+  audio/                        Recording, the connection engine
+  net/                          Wire protocol, UDP and TCP transports
+desktop/src/PhoneMic.Core/      Server, jitter buffer, audio output, USB bridge
+desktop/src/PhoneMic/           Window, QR code, tray (WPF)
+desktop/tests/                  Protocol tests and the network simulation
+desktop/tools/PhoneMic.Probe/   End-to-end test tool
+docs/protocol.md                The wire protocol, with test vectors
+```
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
+
+[MIT](LICENSE). Third-party components are listed in [NOTICE](NOTICE).

@@ -1,5 +1,6 @@
 package sh.aminov.phonemic
 
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -89,6 +90,9 @@ class MicService : Service() {
         super.onDestroy()
     }
 
+    // No timeout on purpose: the lock lives exactly as long as the user keeps the
+    // microphone on, and onDestroy releases it.
+    @SuppressLint("WakelockTimeout")
     private fun acquireLocks() {
         wakeLock = getSystemService(PowerManager::class.java)
             .newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "PhoneMic:stream")

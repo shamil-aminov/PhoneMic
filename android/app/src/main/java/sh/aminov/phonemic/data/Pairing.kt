@@ -1,7 +1,7 @@
 package sh.aminov.phonemic.data
 
 import android.content.Context
-import android.net.Uri
+import androidx.core.net.toUri
 import androidx.core.content.edit
 import sh.aminov.phonemic.net.Protocol
 import java.util.UUID
@@ -16,7 +16,7 @@ data class Pairing(
     companion object {
         /** Parses `phonemic://pair?a=1.2.3.4,5.6.7.8&p=50505&t=TOKEN&n=NAME`. */
         fun parse(text: String): Pairing? {
-            val uri = runCatching { Uri.parse(text.trim()) }.getOrNull() ?: return null
+            val uri = runCatching { text.trim().toUri() }.getOrNull() ?: return null
             if (uri.scheme != "phonemic" || uri.host != "pair") return null
             val token = uri.getQueryParameter("t")?.takeIf { it.isNotBlank() } ?: return null
             val addresses = uri.getQueryParameter("a").orEmpty().split(',').map { it.trim() }.filter { it.isNotEmpty() }

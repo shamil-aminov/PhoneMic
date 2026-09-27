@@ -4,6 +4,47 @@ namespace PhoneMic.Core.Tests;
 
 public class ProtocolTests
 {
+    // The same byte-exact vectors are checked by the phone side in
+    // android/app/src/test/.../ProtocolTest.kt and listed in docs/protocol.md.
+    private const string HelloVector = "504D010104030201" + "03414243" + "0164" + "014E" + "80BB0000" + "01";
+    private const string AudioVector = "504D010304030201" + "07000000" + "0100" + "FEFF";
+    private const string WelcomeVector = "504D010204030201" + "00" + "025043";
+
+    [Fact]
+    public void Hello_from_the_phone_parses()
+    {
+        var data = Convert.FromHexString(HelloVector);
+        Assert.True(PacketReader.TryReadHeader(data, out var header));
+        Assert.Equal(Protocol.Hello, header.Type);
+        Assert.Equal(0x01020304u, header.Session);
+        Assert.Equal(new HelloPayload("ABC", "d", "N", 48000, 1), new PacketReader(data).Hello());
+    }
+
+    [Fact]
+    public void Audio_from_the_phone_parses()
+    {
+        var data = Convert.FromHexString(AudioVector);
+        var reader = new PacketReader(data);
+        Assert.Equal(7u, reader.U32());
+        Assert.Equal(new byte[] { 0x01, 0x00, 0xFE, 0xFF }, reader.RestAsSampleBytes().ToArray());
+    }
+
+    [Fact]
+    public void Welcome_matches_the_spec()
+    {
+        var w = new PacketWriter().Begin(Protocol.Welcome, 0x01020304).U8(Protocol.StatusOk).Str("PC");
+        Assert.Equal(WelcomeVector, Convert.ToHexString(w.Span));
+    }
+
+    [Fact]
+    public void Writer_produces_the_phone_vectors()
+    {
+        var hello = new PacketWriter().Begin(Protocol.Hello, 0x01020304).Str("ABC").Str("d").Str("N").U32(48000).U8(1);
+        Assert.Equal(HelloVector, Convert.ToHexString(hello.Span));
+        var audio = new PacketWriter().Begin(Protocol.Audio, 0x01020304).U32(7).Samples(new short[] { 1, -2 });
+        Assert.Equal(AudioVector, Convert.ToHexString(audio.Span));
+    }
+
     [Fact]
     public void Hello_round_trips()
     {

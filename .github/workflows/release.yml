@@ -1,0 +1,141 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  android:
+    name: Signed APK
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up JDK
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Unit tests
+        run: ./gradlew test --stacktrace
+
+      # The keystore never lives in the repository. It is held as a base64
+      # secret and written to disk only for the length of this job. Without it
+      # the build would fall back to the debug key, which is fine for trying
+      # things out but never for a published release, so the job stops here.
+      - name: Decode keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::error::Keystore secrets are not set. See docs/RELEASING.md." >&2
+            exit 1
+          fi
+          echo "$KEYSTORE_BASE64" | base64 -d > release.jks
+          echo "PHONEMIC_STORE_FILE=$(pwd)/release.jks" >> "$GITHUB_ENV"
+
+      - name: Assemble release
+        env:
+          PHONEMIC_STORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          PHONEMIC_KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          PHONEMIC_KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew assembleRelease --stacktrace
+
+      - name: Remove the keystore
+        if: always()
+        run: rm -f release.jks
+
+      - name: Name the APK after the tag
+        run: |
+          mkdir -p ../dist
+          cp app/build/outputs/apk/release/app-release.apk "../dist/PhoneMic-${GITHUB_REF_NAME#v}-android.apk"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: android
+          path: dist/
+
+  windows:
+    name: Windows executables
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Tests
+        run: dotnet test desktop/tests/PhoneMic.Core.Tests -c Release
+
+      # Two builds of the same app: one that runs anywhere (the .NET runtime is
+      # bundled and compressed inside), and a small one for machines that
+      # already have the .NET 10 Desktop Runtime.
+      - name: Publish
+        shell: bash
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          common="-c Release -r win-x64 -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:DebugType=none -p:Version=$version"
+          dotnet publish desktop/src/PhoneMic $common --self-contained true -p:EnableCompressionInSingleFile=true -o out/standalone
+          dotnet publish desktop/src/PhoneMic $common --self-contained false -o out/small
+          mkdir -p dist
+          cp out/standalone/PhoneMic.exe "dist/PhoneMic-$version-windows-x64.exe"
+          cp out/small/PhoneMic.exe "dist/PhoneMic-$version-windows-x64-requires-dotnet.exe"
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: windows
+          path: dist/
+
+  publish:
+    name: GitHub release
+    needs: [android, windows]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/download-artifact@v8
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Checksums
+        working-directory: dist
+        run: sha256sum * > SHA256SUMS.txt
+
+      # The release text is this version's section of CHANGELOG.md, followed by
+      # a short guide to which file to download.
+      - name: Release notes
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          awk -v ver="$version" '
+            /^## \[/ { printing = index($0, "[" ver "]") > 0; next }
+            printing
+          ' CHANGELOG.md > notes.md
+          if [ ! -s notes.md ]; then
+            echo "::error::CHANGELOG.md has no section for $version." >&2
+            exit 1
+          fi
+          cat .github/release-downloads.md >> notes.md
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v3
+        with:
+          name: PhoneMic ${{ github.ref_name }}
+          body_path: notes.md
+          files: dist/*

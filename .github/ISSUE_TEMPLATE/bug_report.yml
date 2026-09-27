@@ -1,0 +1,76 @@
+name: Bug report
+description: Something does not work
+labels: [bug]
+body:
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What did you expect, and what happened instead?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Pair over Wi-Fi
+        2. Turn the microphone on and lock the phone
+        3. ...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: connection
+    attributes:
+      label: Connection
+      options:
+        - Wi-Fi
+        - USB
+        - Both
+        - Does not connect at all
+    validations:
+      required: true
+
+  - type: input
+    id: phone
+    attributes:
+      label: Phone and Android version
+      placeholder: Pixel 7, Android 14
+    validations:
+      required: true
+
+  - type: input
+    id: windows
+    attributes:
+      label: Windows version
+      placeholder: Windows 11 24H2
+
+  - type: input
+    id: version
+    attributes:
+      label: PhoneMic version
+      placeholder: 1.0.0
+    validations:
+      required: true
+
+  - type: dropdown
+    id: buffer
+    attributes:
+      label: Buffer mode
+      options:
+        - Balanced
+        - Low latency
+        - Stable
+        - Not relevant
+
+  - type: textarea
+    id: log
+    attributes:
+      label: PC log
+      description: >
+        The lines around the problem from %APPDATA%\PhoneMic\log.txt
+        (the "Open log" link in the PC window). The jitter lines show
+        what the network was doing.
+      render: text

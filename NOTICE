@@ -1,0 +1,33 @@
+PhoneMic
+Copyright (c) 2026 Shamil Aminov
+Licensed under the MIT License. See LICENSE.
+
+This product uses third-party material:
+
+--------------------------------------------------------------------------------
+NAudio (Windows audio output), https://github.com/naudio/NAudio
+Copyright (c) Mark Heath and contributors
+Licensed under the MIT License.
+--------------------------------------------------------------------------------
+QRCoder (pairing QR code on the PC), https://github.com/codebude/QRCoder
+Copyright (c) Raffael Herrmann and contributors
+Licensed under the MIT License.
+--------------------------------------------------------------------------------
+Material Symbols (the icon shapes in android/app/src/main/res/drawable and the
+microphone drawn by desktop/tools/make-icons.ps1)
+Copyright Google LLC
+Licensed under the Apache License, Version 2.0.
+--------------------------------------------------------------------------------
+Android Jetpack libraries (AndroidX, Jetpack Compose)
+Copyright The Android Open Source Project
+Licensed under the Apache License, Version 2.0.
+--------------------------------------------------------------------------------
+Google code scanner (play-services-code-scanner, the QR scanner on the phone)
+Copyright Google LLC
+Proprietary; provided under the Android Software Development Kit License
+Agreement and the ML Kit Terms of Service. It relies on Google Play services
+being installed on the phone.
+--------------------------------------------------------------------------------
+
+PhoneMic sends audio to VB-Audio Virtual Cable, which is not bundled and is
+installed separately by the user: https://vb-audio.com/Cable/

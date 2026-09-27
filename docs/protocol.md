@@ -83,3 +83,16 @@ from the other as a lost connection. The phone then goes back to sending
 ### 6 `BYE` either direction
 
 No payload. Ends the session immediately.
+
+## Test vectors
+
+Both implementations check these exact bytes
+(`android/app/src/test/java/sh/aminov/phonemic/net/ProtocolTest.kt` and
+`desktop/tests/PhoneMic.Core.Tests/ProtocolTests.cs`), so a change to the wire
+format on one side fails the tests on both.
+
+| Packet | Hex |
+|--------|-----|
+| `HELLO` session `0x01020304`, token `ABC`, device id `d`, name `N`, 48000 Hz, mono | `504D010104030201 03414243 0164 014E 80BB0000 01` |
+| `AUDIO` session `0x01020304`, seq 7, samples `1, -2` | `504D010304030201 07000000 0100 FEFF` |
+| `WELCOME` session `0x01020304`, ok, PC name `PC` | `504D010204030201 00 025043` |
