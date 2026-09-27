@@ -9,18 +9,20 @@ public sealed class Engine : IDisposable
     public JitterBuffer Buffer { get; } = new();
     public AudioServer Server { get; }
     public AudioOutput Output { get; }
-    public UsbBridge Usb { get; }
+    public UsbBridge? Usb { get; }
 
-    public Engine(Settings settings)
+    /// <param name="audio">False for the design preview: nothing listens, plays or touches adb.</param>
+    public Engine(Settings settings, bool audio = true)
     {
         Settings = settings;
         Buffer.Gain = settings.Gain;
         Buffer.Profile = BufferProfile.For(settings.BufferMode);
         Server = new AudioServer(Buffer, () => Settings.Token, settings.Port);
-        Server.Start();
         Output = new AudioOutput(Buffer);
-        Usb = new UsbBridge(settings.Port);
+        if (!audio) return;
 
+        Server.Start();
+        Usb = new UsbBridge(settings.Port);
         var device = PickDevice(AudioOutput.ListDevices());
         if (device != null) Output.Start(device.Id);
     }
@@ -69,7 +71,7 @@ public sealed class Engine : IDisposable
     public void Dispose()
     {
         Settings.Save();
-        Usb.Dispose();
+        Usb?.Dispose();
         Output.Dispose();
         Server.Dispose();
     }

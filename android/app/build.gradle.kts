@@ -3,6 +3,7 @@ import java.util.Properties
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.roborazzi)
 }
 
 /**
@@ -68,6 +69,20 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
+    }
+    testOptions {
+        // Screenshot tests render the real UI on the JVM through Robolectric.
+        unitTests.isIncludeAndroidResources = true
+        unitTests.all {
+            // Robolectric reaches into JDK internals that recent JDKs keep closed.
+            it.jvmArgs(
+                "--add-opens=java.base/java.io=ALL-UNNAMED",
+                "--add-opens=java.base/java.lang=ALL-UNNAMED",
+                "--add-exports=java.base/jdk.internal.access=ALL-UNNAMED",
+                "--enable-native-access=ALL-UNNAMED",
+            )
+        }
     }
 }
 
@@ -84,5 +99,11 @@ dependencies {
     // The scanner drags in an old Fragment that breaks ActivityResult permission requests.
     implementation(libs.androidx.fragment)
     testImplementation(libs.junit)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.roborazzi)
+    testImplementation(libs.roborazzi.compose)
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.compose.ui.test.junit4)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
 }

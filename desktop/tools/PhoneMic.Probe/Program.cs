@@ -9,7 +9,7 @@ using PhoneMic.Core;
 // Test harness for checking the audio path end to end without a human listening.
 //
 //   probe devices
-//   probe fakephone <host> <token> [udp|tcp] [seconds] [freqHz] [lossPercent]
+//   probe fakephone <host> <token> [udp|tcp] [seconds] [freqHz] [lossPercent] [port]
 //   probe listen <token> [seconds] [out.wav]      run a bare server and analyse what arrives
 //   probe record <device substring> [seconds]     capture from e.g. "CABLE Output" and analyse
 
@@ -24,7 +24,8 @@ switch (cmd)
         }
         break;
     case "fakephone":
-        await FakePhone(args[1], args[2], Arg(3, "udp"), int.Parse(Arg(4, "5")), int.Parse(Arg(5, "1000")), int.Parse(Arg(6, "0")));
+        await FakePhone(args[1], args[2], Arg(3, "udp"), int.Parse(Arg(4, "5")), int.Parse(Arg(5, "1000")), int.Parse(Arg(6, "0")),
+            int.Parse(Arg(7, Protocol.DefaultPort.ToString())));
         break;
     case "listen":
         Listen(args[1], int.Parse(Arg(2, "10")), args.Length > 3 ? args[3] : null);
@@ -40,13 +41,13 @@ return 0;
 
 string Arg(int i, string fallback) => args.Length > i ? args[i] : fallback;
 
-static async Task FakePhone(string host, string token, string transport, int seconds, int freq, int lossPercent)
+static async Task FakePhone(string host, string token, string transport, int seconds, int freq, int lossPercent, int port)
 {
     const int rate = 48000, frame = 480;
     var session = (uint)Random.Shared.Next();
     var w = new PacketWriter();
     var rx = new byte[Protocol.MaxPacketSize];
-    var target = new IPEndPoint(IPAddress.Parse(host), Protocol.DefaultPort);
+    var target = new IPEndPoint(IPAddress.Parse(host), port);
 
     Func<ReadOnlyMemory<byte>, Task> send;
     Func<Task<byte[]>> receive;

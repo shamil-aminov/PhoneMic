@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="background">#0E1113</color>
-    <color name="live">#3DDC97</color>
+    <color name="background">#000000</color>
 
     <style name="Theme.PhoneMic" parent="android:Theme.Material.NoActionBar">
         <item name="android:windowBackground">@color/background</item>
+        <item name="android:colorBackground">@color/background</item>
     </style>
 </resources>

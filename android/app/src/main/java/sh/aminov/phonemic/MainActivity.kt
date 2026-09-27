@@ -23,6 +23,7 @@ import sh.aminov.phonemic.data.Pairing
 import sh.aminov.phonemic.data.Prefs
 import sh.aminov.phonemic.ui.MainScreen
 import sh.aminov.phonemic.ui.PhoneMicTheme
+import sh.aminov.phonemic.ui.ScreenState
 
 class MainActivity : ComponentActivity() {
     private lateinit var prefs: Prefs
@@ -55,15 +56,18 @@ class MainActivity : ComponentActivity() {
             val micError by MicState.micError.collectAsStateWithLifecycle()
             PhoneMicTheme {
                 MainScreen(
-                    running = running,
-                    link = link,
-                    level = level,
-                    micError = micError,
-                    pairing = pairing,
-                    noiseSuppression = noiseSuppression,
+                    state = ScreenState(
+                        running = running,
+                        link = link,
+                        level = level,
+                        micError = micError,
+                        pairing = pairing,
+                        noiseSuppression = noiseSuppression,
+                    ),
                     onToggle = { if (running) MicService.stop(this) else startMic() },
-                    onScan = ::scan,
+                    onScan = { scan() },
                     onNoiseSuppressionChange = ::changeNoiseSuppression,
+                    version = BuildConfig.VERSION_NAME,
                 )
             }
         }

@@ -18,6 +18,12 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
+        if (e.Args.FirstOrDefault(a => a.StartsWith("--preview")) is { } preview)
+        {
+            StartPreview(live: preview != "--preview=pairing");
+            return;
+        }
+
         _instanceMutex = new Mutex(true, InstanceName, out var first);
         _showSignal = new EventWaitHandle(false, EventResetMode.AutoReset, InstanceName + ".Show");
         if (!first)
@@ -58,6 +64,21 @@ public partial class App : Application
             while (_showSignal.WaitOne())
                 Dispatcher.BeginInvoke(ShowWindow);
         }) { IsBackground = true, Name = "PhoneMic show signal" }.Start();
+    }
+
+    /// <summary>
+    /// `--preview` or `--preview=pairing`: the window with made-up data and no
+    /// audio or networking at all, for screenshots and design work. It runs
+    /// beside a real instance without touching it.
+    /// </summary>
+    private void StartPreview(bool live)
+    {
+        _engine = new Engine(new Settings { Token = "EXAMPLE7", Transient = true }, audio: false);
+        _window = new MainWindow(_engine);
+        _window.AllowClose();
+        _window.Closed += (_, _) => Shutdown();
+        _window.ShowPreview(live);
+        _window.Show();
     }
 
     private void ShowWindow()

@@ -4,39 +4,47 @@
              ThemeMode="Dark"
              ShutdownMode="OnExplicitShutdown">
     <Application.Resources>
+        <!-- Same palette as the phone (android/.../ui/Theme.kt): true black for OLED, cyan to violet. -->
         <!-- Fluent theme accent, so sliders and checkboxes match the app instead of the system colour. -->
-        <Color x:Key="SystemAccentColor">#3DDC97</Color>
-        <Color x:Key="SystemAccentColorLight1">#5FE3AA</Color>
-        <Color x:Key="SystemAccentColorLight2">#83EAC0</Color>
-        <Color x:Key="SystemAccentColorLight3">#A8F1D4</Color>
-        <Color x:Key="SystemAccentColorDark1">#2FB27A</Color>
-        <Color x:Key="SystemAccentColorDark2">#23895E</Color>
-        <Color x:Key="SystemAccentColorDark3">#186043</Color>
-        <SolidColorBrush x:Key="AccentFillColorDefaultBrush" Color="#3DDC97" />
-        <SolidColorBrush x:Key="AccentFillColorSecondaryBrush" Color="#5FE3AA" />
-        <SolidColorBrush x:Key="AccentFillColorTertiaryBrush" Color="#2FB27A" />
-        <SolidColorBrush x:Key="SliderTrackValueFill" Color="#3DDC97" />
-        <SolidColorBrush x:Key="SliderTrackValueFillPointerOver" Color="#5FE3AA" />
-        <SolidColorBrush x:Key="SliderTrackValueFillPressed" Color="#2FB27A" />
-        <SolidColorBrush x:Key="SliderThumbBackground" Color="#3DDC97" />
-        <SolidColorBrush x:Key="SliderThumbBackgroundPointerOver" Color="#5FE3AA" />
-        <SolidColorBrush x:Key="SliderThumbBackgroundPressed" Color="#2FB27A" />
-        <SolidColorBrush x:Key="Bg" Color="#0E1113" />
-        <SolidColorBrush x:Key="Surface" Color="#171B1E" />
-        <SolidColorBrush x:Key="SurfaceHigh" Color="#20262A" />
-        <SolidColorBrush x:Key="Outline" Color="#2C3438" />
-        <SolidColorBrush x:Key="Text" Color="#E8ECEE" />
-        <SolidColorBrush x:Key="TextDim" Color="#8A969C" />
-        <SolidColorBrush x:Key="Live" Color="#3DDC97" />
-        <SolidColorBrush x:Key="LiveDim" Color="#1C4A38" />
-        <SolidColorBrush x:Key="Warn" Color="#F2B84B" />
-        <SolidColorBrush x:Key="Error" Color="#FF6B6B" />
+        <Color x:Key="SystemAccentColor">#22D3EE</Color>
+        <Color x:Key="SystemAccentColorLight1">#4FDCF1</Color>
+        <Color x:Key="SystemAccentColorLight2">#7BE5F4</Color>
+        <Color x:Key="SystemAccentColorLight3">#A7EEF8</Color>
+        <Color x:Key="SystemAccentColorDark1">#1BAAC0</Color>
+        <Color x:Key="SystemAccentColorDark2">#148193</Color>
+        <Color x:Key="SystemAccentColorDark3">#0D5864</Color>
+        <SolidColorBrush x:Key="AccentFillColorDefaultBrush" Color="#22D3EE" />
+        <SolidColorBrush x:Key="AccentFillColorSecondaryBrush" Color="#4FDCF1" />
+        <SolidColorBrush x:Key="AccentFillColorTertiaryBrush" Color="#1BAAC0" />
+        <SolidColorBrush x:Key="SliderTrackValueFill" Color="#22D3EE" />
+        <SolidColorBrush x:Key="SliderTrackValueFillPointerOver" Color="#4FDCF1" />
+        <SolidColorBrush x:Key="SliderTrackValueFillPressed" Color="#1BAAC0" />
+        <SolidColorBrush x:Key="SliderThumbBackground" Color="#22D3EE" />
+        <SolidColorBrush x:Key="SliderThumbBackgroundPointerOver" Color="#4FDCF1" />
+        <SolidColorBrush x:Key="SliderThumbBackgroundPressed" Color="#1BAAC0" />
+        <SolidColorBrush x:Key="Bg" Color="#000000" />
+        <SolidColorBrush x:Key="Surface" Color="#0B0C0F" />
+        <SolidColorBrush x:Key="SurfaceHigh" Color="#16191E" />
+        <SolidColorBrush x:Key="Outline" Color="#1B1E24" />
+        <SolidColorBrush x:Key="Text" Color="#F2F4F7" />
+        <SolidColorBrush x:Key="TextDim" Color="#8B93A1" />
+        <SolidColorBrush x:Key="TextFaint" Color="#4A515C" />
+        <SolidColorBrush x:Key="Live" Color="#22D3EE" />
+        <LinearGradientBrush x:Key="Accent" StartPoint="0,0" EndPoint="1,0">
+            <GradientStop Color="#22D3EE" Offset="0" />
+            <GradientStop Color="#60A5FA" Offset="0.5" />
+            <GradientStop Color="#A78BFA" Offset="1" />
+        </LinearGradientBrush>
+        <SolidColorBrush x:Key="LiveDim" Color="#0A2A31" />
+        <SolidColorBrush x:Key="Warn" Color="#FBBF24" />
+        <SolidColorBrush x:Key="Error" Color="#F43F5E" />
 
+        <!-- Cards are outlines on black, as on the phone; only islands and controls get a fill. -->
         <Style x:Key="Card" TargetType="Border">
-            <Setter Property="Background" Value="{StaticResource Surface}" />
+            <Setter Property="Background" Value="{StaticResource Bg}" />
             <Setter Property="BorderBrush" Value="{StaticResource Outline}" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="CornerRadius" Value="14" />
+            <Setter Property="CornerRadius" Value="22" />
             <Setter Property="Padding" Value="20" />
             <Setter Property="Margin" Value="0,14,0,0" />
         </Style>
@@ -68,7 +76,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="RadioButton">
                         <Border x:Name="Box" Background="{StaticResource SurfaceHigh}" BorderBrush="{StaticResource Outline}"
-                                BorderThickness="1" CornerRadius="8" Padding="6,7" Margin="2,0">
+                                BorderThickness="1" CornerRadius="12" Padding="6,8" Margin="2,0">
                             <TextBlock Text="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}"
                                        FontSize="12" HorizontalAlignment="Center" TextTrimming="CharacterEllipsis" />
                         </Border>

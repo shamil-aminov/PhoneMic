@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace PhoneMic.Core;
 
@@ -11,6 +12,10 @@ public sealed class Settings
     public string? OutputDeviceId { get; set; }
     public float Gain { get; set; } = 1f;
     public BufferMode BufferMode { get; set; } = BufferMode.Balanced;
+
+    /// <summary>Never written to disk, e.g. the made-up settings of the design preview.</summary>
+    [JsonIgnore]
+    public bool Transient { get; init; }
 
     public static Settings Load()
     {
@@ -30,6 +35,7 @@ public sealed class Settings
 
     public void Save()
     {
+        if (Transient) return;
         try
         {
             Directory.CreateDirectory(Log.Directory);

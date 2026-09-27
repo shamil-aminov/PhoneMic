@@ -20,7 +20,8 @@ public partial class MainWindow : Window
     private bool _hintShown;
     private bool _loadingDevices;
     private bool _qrForced;
-    private double _meter;
+    private DateTime _clippedUntil;
+    private DateTime? _previewStart;
 
     /// <summary>Raised the first time the window is closed into the tray.</summary>
     public event Action? HiddenToTray;
@@ -87,6 +88,15 @@ public partial class MainWindow : Window
         Log.Info($"Pairing QR: {uri}");
     }
 
+    /// <summary>Made-up data for the design preview: a phone on USB, talking.</summary>
+    public void ShowPreview(bool live)
+    {
+        _previewStart = DateTime.UtcNow;
+        if (!live) return;
+        ShowSession(new SessionInfo("Pixel 8", Transport.Usb, new System.Net.IPEndPoint(System.Net.IPAddress.Loopback, 0), 48000));
+        StatsText.Text = $"Буфер 32 мс · потери {0.0:F1}%";
+    }
+
     private void ShowSession(SessionInfo? session)
     {
         var live = session != null;
@@ -94,17 +104,18 @@ public partial class MainWindow : Window
         PairPanel.Visibility = live && !_qrForced ? Visibility.Collapsed : Visibility.Visible;
         HideQrButton.Visibility = live && _qrForced ? Visibility.Visible : Visibility.Collapsed;
 
-        StatusDot.Fill = (Brush)FindResource(live ? "Live" : "TextDim");
-        StatusText.Foreground = (Brush)FindResource(live ? "Live" : "TextDim");
-        StatusPill.Background = (Brush)FindResource(live ? "LiveDim" : "SurfaceHigh");
+        var dot = (Brush)FindResource(live ? "Live" : "TextFaint");
+        StatusDot.Fill = dot;
+        StatusHalo.Fill = dot;
+        StatusText.Foreground = (Brush)FindResource(live ? "Text" : "TextDim");
         StatusText.Text = live ? "Подключено" : "Ожидание телефона";
 
         if (session != null)
         {
             DeviceNameText.Text = session.DeviceName;
             TransportText.Text = session.Transport == Transport.Usb
-                ? "По USB-кабелю"
-                : $"По Wi-Fi · {session.Remote.Address}";
+                ? "USB-кабель"
+                : $"Wi-Fi · {session.Remote.Address}";
         }
         else
         {
@@ -114,20 +125,27 @@ public partial class MainWindow : Window
 
     private void Tick()
     {
-        // Fast attack, slow release, on a dB scale like a real meter.
+        if (_previewStart is { } start)
+        {
+            // Speech-like: syllables inside phrases inside pauses.
+            var t = (DateTime.UtcNow - start).TotalSeconds;
+            Wave.Level = 0.02 + 0.5 * Math.Abs(Math.Sin(t * 5.1)) * Math.Max(0, Math.Sin(t * 0.9 + 1.2));
+            return;
+        }
         var peak = _engine.Server.TakePeak();
-        var db = 20 * Math.Log10(Math.Max(peak, 1e-4));
-        var target = Math.Clamp((db + 60) / 60, 0, 1);
-        _meter = target > _meter ? target : Math.Max(target, _meter - 0.03);
-        var track = ((FrameworkElement)LevelFill.Parent).ActualWidth;
-        LevelFill.Width = track * _meter;
-        LevelFill.Background = (Brush)FindResource(db > -1 ? "Error" : "Live");
+        Wave.Level = peak;
+        // Anything at full scale after the volume boost is clipping; keep the warning up a moment.
+        if (peak >= 0.99f) _clippedUntil = DateTime.UtcNow.AddSeconds(1.5);
 
         if (_engine.Server.Current == null) return;
         var received = _engine.Server.PacketsReceived;
         var lost = _engine.Server.PacketsLost;
         var lossPercent = received + lost == 0 ? 0 : 100.0 * lost / (received + lost);
-        StatsText.Text = $"Задержка буфера {_engine.Buffer.TargetMs:F0} мс · потери {lossPercent:F1}%";
+        var clipping = DateTime.UtcNow < _clippedUntil;
+        StatsText.Foreground = (Brush)FindResource(clipping ? "Error" : "TextDim");
+        StatsText.Text = clipping
+            ? "Перегруз: уменьшите громкость"
+            : $"Буфер {_engine.Buffer.TargetMs:F0} мс · потери {lossPercent:F1}%";
     }
 
     private void LoadDevices()
@@ -135,7 +153,8 @@ public partial class MainWindow : Window
         _loadingDevices = true;
         var devices = AudioOutput.ListDevices();
         DeviceBox.ItemsSource = devices;
-        var current = _engine.Output.DeviceId is { } id ? devices.FirstOrDefault(d => d.Id == id) : null;
+        // In the preview nothing is playing, so show what would be picked.
+        var current = _engine.Output.DeviceId is { } id ? devices.FirstOrDefault(d => d.Id == id) : _engine.PickDevice(devices);
         DeviceBox.SelectedItem = current;
         CableWarning.Visibility = devices.Any(d => d.IsVirtualCable) ? Visibility.Collapsed : Visibility.Visible;
         _loadingDevices = false;

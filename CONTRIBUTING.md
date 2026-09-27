@@ -25,6 +25,16 @@ dotnet test desktop/tests/PhoneMic.Core.Tests
 
 CI runs exactly these on every push and pull request.
 
+## Looking at the UI without a device
+
+- **Phone:** `./gradlew recordRoborazziDebug` renders every state of the main
+  screen on the JVM into `android/app/screenshots/`. Changing the design means
+  re-recording them and committing the images with the code.
+- **PC:** `PhoneMic.exe --preview` opens the window streaming a made-up phone,
+  and `--preview=pairing` opens it waiting for one. The preview does no audio or
+  networking and never saves settings, so it runs safely next to a real
+  instance.
+
 ## Guidelines
 
 - **Match the code around you.** Comments explain *why*, not *what*; names say

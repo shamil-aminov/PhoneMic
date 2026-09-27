@@ -11,14 +11,18 @@ First release.
 
 ### Added
 
-- **The phone app.** One button that turns the microphone on and off, a level
-  meter, the paired PC and how the link is doing (Wi-Fi or USB, round-trip
-  time). Recording runs in a foreground service with wake and Wi-Fi locks, so
+- **The phone app.** A glowing wave that swells with the voice and doubles as
+  the on/off switch, a status dot (red off, amber connecting, cyan live), and an
+  island at the bottom with the paired PC, the link (Wi-Fi or USB, round-trip
+  time) and a QR button to pair another. True black throughout, for OLED
+  screens. Recording runs in a foreground service with wake and Wi-Fi locks, so
   it carries on with the screen off.
 - **The PC app.** Shows the pairing QR code, receives the audio and plays it
   into VB-Audio Virtual Cable, where other programs see it as the microphone
-  *CABLE Output*. Level meter, volume up to 400%, output device choice, start
-  with Windows, and a tray icon that turns green while a phone is streaming.
+  *CABLE Output*. The same wave, drawn from the audio that arrives, a clipping
+  warning, volume up to 400%, output device choice, start with Windows, and a
+  tray icon that lights up while a phone is streaming. `--preview` shows the
+  window with made-up data.
 - **One-time pairing by QR code**, scanned in the app or opened from any QR
   reader as a `phonemic://` link. The phone finds the PC again after its IP
   address changes by also broadcasting its hello.
@@ -34,8 +38,9 @@ First release.
   message when Android refuses the microphone.
 - **A wire protocol** documented in `docs/protocol.md`, with byte-exact test
   vectors checked by both the Kotlin and the C# implementation.
-- **Tests**: protocol tests on both sides, and simulations of the jitter
-  buffer against USB, bad Wi-Fi and clock drift on a virtual clock.
+- **Tests**: protocol tests on both sides, simulations of the jitter buffer
+  against USB, bad Wi-Fi and clock drift on a virtual clock, and screenshot
+  tests that render every state of the phone screen on the JVM.
 - **`probe`**, a tool that checks the whole chain without anyone speaking: the
   phone plays a test tone and `probe` analyses what comes out of the virtual
   cable.

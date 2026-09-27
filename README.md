@@ -13,7 +13,7 @@
 
 PhoneMic streams your phone's microphone to your PC, where Discord, Zoom, OBS
 and every other program see it as an ordinary microphone. You pair once by
-scanning a QR code, and from then on it is one button on the phone.
+scanning a QR code, and from then on it is one tap on the phone.
 
 It exists because the apps that already do this tend to fail in the same two
 ways: the connection drops after a while, and getting it going is fiddly.
@@ -36,6 +36,21 @@ PhoneMic is built around not doing either.
   optional start with Windows.
 - **Local only.** No account, no cloud, no analytics. Audio goes straight from
   the phone to the PC.
+
+## Screens
+
+| Off | Connecting | First launch |
+| :---: | :---: | :---: |
+| <img src="android/app/screenshots/3-off.png" width="220" alt="Microphone off: the wave is a dim thread"> | <img src="android/app/screenshots/4-connecting.png" width="220" alt="Looking for the PC: an amber dot pulses"> | <img src="android/app/screenshots/7-unpaired.png" width="220" alt="No PC paired yet: a prompt to scan the QR code"> |
+
+The wave is the switch: tap it to turn the microphone on or off. It swells
+with your voice on the phone and, from the audio that actually arrives, in the
+PC window. The dot above it is red when the microphone is off, amber while the
+phone looks for the PC and cyan when you are live. The island at the bottom is
+the paired PC; the QR button on its right pairs a different one. Noise
+suppression lives behind the gear icon.
+
+Both apps are true black, which on an OLED screen costs no light at all.
 
 ## How it works
 
@@ -80,7 +95,7 @@ they do.
 
 4. **Install the app on the phone**, tap **Scan** and point the camera at the
    QR code.
-5. **Tap the big button.** It turns green once the PC is receiving.
+5. **Tap the wave.** The dot above it turns cyan once the PC is receiving.
 6. **In Discord, Zoom or OBS**, choose **CABLE Output** as the microphone.
 
 Closing the PC window hides it to the tray; the microphone keeps working.

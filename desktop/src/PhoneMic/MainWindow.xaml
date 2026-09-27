@@ -1,6 +1,7 @@
 <Window x:Class="PhoneMic.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:PhoneMic"
         Title="PhoneMic"
         Width="440"
         SizeToContent="Height"
@@ -12,18 +13,17 @@
         UseLayoutRounding="True">
     <StackPanel Margin="20,16,20,20">
 
-        <!-- Header -->
+        <!-- Header: the same dot and colours as the phone's status line -->
         <Grid>
             <TextBlock Text="PhoneMic" FontSize="22" FontWeight="SemiBold" VerticalAlignment="Center" />
-            <Border x:Name="StatusPill" HorizontalAlignment="Right" CornerRadius="12" Padding="10,4"
-                    Background="{StaticResource SurfaceHigh}">
-                <StackPanel Orientation="Horizontal">
-                    <Ellipse x:Name="StatusDot" Width="8" Height="8" Fill="{StaticResource TextDim}"
-                             VerticalAlignment="Center" Margin="0,0,8,0" />
-                    <TextBlock x:Name="StatusText" Text="Ожидание телефона" FontSize="12"
-                               Foreground="{StaticResource TextDim}" VerticalAlignment="Center" />
-                </StackPanel>
-            </Border>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Grid Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center">
+                    <Ellipse x:Name="StatusHalo" Fill="{StaticResource TextFaint}" Opacity="0.25" />
+                    <Ellipse x:Name="StatusDot" Width="7" Height="7" Fill="{StaticResource TextFaint}" />
+                </Grid>
+                <TextBlock x:Name="StatusText" Text="Ожидание телефона" FontSize="13"
+                           Foreground="{StaticResource TextDim}" VerticalAlignment="Center" />
+            </StackPanel>
         </Grid>
 
         <!-- Pairing / live view -->
@@ -31,7 +31,7 @@
             <!-- Fixed height so the window does not jump when a phone connects. -->
             <Grid Height="376">
                 <StackPanel x:Name="PairPanel" VerticalAlignment="Center">
-                    <Border Background="White" CornerRadius="12" Padding="14" HorizontalAlignment="Center">
+                    <Border Background="White" CornerRadius="16" Padding="14" HorizontalAlignment="Center">
                         <Image x:Name="QrImage" Width="216" Height="216"
                                RenderOptions.BitmapScalingMode="NearestNeighbor" />
                     </Border>
@@ -46,27 +46,54 @@
                             Click="HideQr_Click" />
                 </StackPanel>
 
-                <StackPanel x:Name="LivePanel" Visibility="Collapsed" VerticalAlignment="Center">
-                    <Border Width="96" Height="96" CornerRadius="48" Background="{StaticResource LiveDim}"
-                            HorizontalAlignment="Center">
-                        <TextBlock Text="&#xE8EA;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="42"
-                                   Foreground="{StaticResource Live}" HorizontalAlignment="Center"
-                                   VerticalAlignment="Center" />
-                    </Border>
-                    <TextBlock x:Name="DeviceNameText" FontSize="22" FontWeight="SemiBold" HorizontalAlignment="Center"
-                               Margin="0,16,0,2" />
-                    <TextBlock x:Name="TransportText" Style="{StaticResource Hint}" HorizontalAlignment="Center" />
+                <Grid x:Name="LivePanel" Visibility="Collapsed">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <!-- Reaches past the card padding: the wave fades out at its own edges. -->
+                    <local:WaveView x:Name="Wave" Margin="-20,0" />
 
-                    <Grid Margin="8,28,8,0">
-                        <Border Height="10" CornerRadius="5" Background="{StaticResource SurfaceHigh}" />
-                        <Border x:Name="LevelFill" Height="10" CornerRadius="5" Background="{StaticResource Live}"
-                                HorizontalAlignment="Left" Width="0" />
-                    </Grid>
-                    <TextBlock x:Name="StatsText" Style="{StaticResource Hint}" HorizontalAlignment="Center"
-                               Margin="0,10,0,0" />
-                    <Button Content="Показать QR-код" Style="{StaticResource LinkButton}" HorizontalAlignment="Center"
-                            Margin="0,24,0,0" Click="ShowQr_Click" />
-                </StackPanel>
+                    <!-- The phone, as an island like the computer on the phone's screen -->
+                    <Border Grid.Row="1" CornerRadius="28" Background="{StaticResource Surface}"
+                            BorderBrush="{StaticResource Outline}" BorderThickness="1" Padding="18,10,8,10"
+                            HorizontalAlignment="Center" MinWidth="300">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="&#xE8EA;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="18"
+                                       Foreground="{StaticResource TextDim}" VerticalAlignment="Center" />
+                            <StackPanel Grid.Column="1" Margin="14,0,12,0" VerticalAlignment="Center">
+                                <TextBlock x:Name="DeviceNameText" FontSize="15" FontWeight="SemiBold"
+                                           TextTrimming="CharacterEllipsis" />
+                                <TextBlock x:Name="TransportText" FontSize="12" Foreground="{StaticResource TextDim}" />
+                            </StackPanel>
+                            <Button Grid.Column="2" Click="ShowQr_Click" ToolTip="Показать QR-код" Cursor="Hand">
+                                <Button.Template>
+                                    <ControlTemplate TargetType="Button">
+                                        <Border x:Name="Round" Width="40" Height="40" CornerRadius="20"
+                                                Background="{StaticResource SurfaceHigh}">
+                                            <TextBlock Text="&#xED14;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
+                                                       FontSize="16" Foreground="{StaticResource Text}"
+                                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter TargetName="Round" Property="Background" Value="{StaticResource Outline}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </Grid>
+                    </Border>
+                    <TextBlock x:Name="StatsText" Grid.Row="2" Style="{StaticResource Hint}" HorizontalAlignment="Center"
+                               Margin="0,12,0,0" />
+                </Grid>
             </Grid>
         </Border>
 
