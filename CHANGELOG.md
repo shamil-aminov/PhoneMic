@@ -23,6 +23,8 @@ First release.
   warning, volume up to 400%, output device choice, start with Windows, and a
   tray icon that lights up while a phone is streaming. `--preview` shows the
   window with made-up data.
+- **English and Russian**, following the system language: per-app language
+  on Android 13 and later, and `--lang=en|ru` to override it on the PC.
 - **One-time pairing by QR code**, scanned in the app or opened from any QR
   reader as a `phonemic://` link. The phone finds the PC again after its IP
   address changes by also broadcasting its hello.
@@ -40,7 +42,8 @@ First release.
   vectors checked by both the Kotlin and the C# implementation.
 - **Tests**: protocol tests on both sides, simulations of the jitter buffer
   against USB, bad Wi-Fi and clock drift on a virtual clock, and screenshot
-  tests that render every state of the phone screen on the JVM.
+  tests that render every state of the phone screen on the JVM in both
+  languages.
 - **`probe`**, a tool that checks the whole chain without anyone speaking: the
   phone plays a test tone and `probe` analyses what comes out of the virtual
   cable.

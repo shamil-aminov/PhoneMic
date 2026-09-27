@@ -1,11 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">PhoneMic</string>
-    <string name="channel_name">Микрофон</string>
-    <string name="notification_title">Микрофон включён</string>
-    <string name="turn_off">Выключить</string>
-    <string name="mic_permission_needed">Без доступа к микрофону приложение не может работать</string>
-    <string name="not_a_phonemic_code">Это не QR-код PhoneMic</string>
-    <string name="scanner_failed">Не удалось открыть сканер QR-кодов</string>
-    <string name="paired_with">Компьютер «%1$s» сохранён</string>
+    <string name="app_name" translatable="false">PhoneMic</string>
+
+    <!-- Status line above the wave -->
+    <string name="status_no_pc">No computer</string>
+    <string name="status_no_pc_detail">Scan the QR code in PhoneMic on your computer</string>
+    <string name="status_off">Microphone off</string>
+    <string name="status_off_detail">Tap the wave to turn it on</string>
+    <string name="status_connecting">Connecting…</string>
+    <string name="status_connecting_detail">Looking for “%1$s” over USB and Wi-Fi</string>
+    <string name="status_live">Microphone on</string>
+    <string name="status_live_detail">Tap the wave to turn it off</string>
+    <string name="status_refused">Not connected</string>
+    <string name="status_mic_unavailable">No access to the microphone</string>
+    <string name="mic_unavailable_detail">Could not open the microphone. Unlock the phone and turn it on again.</string>
+    <string name="refused_wrong_token">The computer did not recognise this phone. Scan the QR code again.</string>
+    <string name="refused_busy">Another phone is already connected to the computer</string>
+
+    <!-- The island with the paired computer -->
+    <string name="island_off">Not connected</string>
+    <string name="island_searching">Searching…</string>
+    <string name="island_refused">No connection</string>
+    <string name="link_with_rtt">%1$s · %2$d ms</string>
+    <string name="computer_unnamed">Computer</string>
+
+    <!-- Buttons and settings -->
+    <string name="scan_qr">Scan QR code</string>
+    <string name="change_computer">Change computer</string>
+    <string name="turn_mic_on">Turn microphone on</string>
+    <string name="turn_mic_off">Turn microphone off</string>
+    <string name="settings">Settings</string>
+    <string name="noise_suppression">Noise suppression</string>
+    <string name="noise_suppression_detail">The phone\'s own noise and echo suppression</string>
+    <string name="computer">Computer</string>
+    <string name="computer_none">Not selected</string>
+    <string name="change">Change</string>
+    <string name="version">PhoneMic %1$s</string>
+
+    <!-- Notification while streaming -->
+    <string name="channel_name">Microphone</string>
+    <string name="notification_title">Microphone on</string>
+    <string name="turn_off">Turn off</string>
+    <string name="notification_off">Off</string>
+    <string name="notification_searching">Looking for “%1$s”…</string>
+    <string name="notification_streaming">Streaming to “%1$s” · %2$s</string>
+
+    <!-- Messages -->
+    <string name="mic_permission_needed">PhoneMic cannot work without access to the microphone</string>
+    <string name="not_a_phonemic_code">This is not a PhoneMic QR code</string>
+    <string name="scanner_failed">Could not open the QR scanner</string>
+    <string name="paired_with">Computer “%1$s” saved</string>
 </resources>

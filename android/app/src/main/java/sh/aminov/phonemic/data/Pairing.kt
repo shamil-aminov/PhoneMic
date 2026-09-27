@@ -11,6 +11,7 @@ data class Pairing(
     val addresses: List<String>,
     val port: Int,
     val token: String,
+    /** As the PC reported it; empty for a QR code without a name. */
     val pcName: String,
 ) {
     companion object {
@@ -21,7 +22,7 @@ data class Pairing(
             val token = uri.getQueryParameter("t")?.takeIf { it.isNotBlank() } ?: return null
             val addresses = uri.getQueryParameter("a").orEmpty().split(',').map { it.trim() }.filter { it.isNotEmpty() }
             val port = uri.getQueryParameter("p")?.toIntOrNull() ?: Protocol.DEFAULT_PORT
-            return Pairing(addresses, port, token, uri.getQueryParameter("n") ?: "ПК")
+            return Pairing(addresses, port, token, uri.getQueryParameter("n").orEmpty())
         }
     }
 }
@@ -36,7 +37,7 @@ class Prefs(context: Context) {
                 addresses = prefs.getString("addresses", "").orEmpty().split(',').filter { it.isNotEmpty() },
                 port = prefs.getInt("port", Protocol.DEFAULT_PORT),
                 token = token,
-                pcName = prefs.getString("pcName", "ПК").orEmpty(),
+                pcName = prefs.getString("pcName", "").orEmpty(),
             )
         }
         set(value) = prefs.edit {

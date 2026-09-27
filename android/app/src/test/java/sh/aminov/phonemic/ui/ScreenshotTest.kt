@@ -13,21 +13,20 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import org.robolectric.annotation.GraphicsMode
 import sh.aminov.phonemic.audio.LinkState
+import sh.aminov.phonemic.audio.Refusal
 import sh.aminov.phonemic.data.Pairing
 import sh.aminov.phonemic.net.TransportKind
 
 /**
- * Renders every state of the main screen on the JVM.
+ * Renders every state of the main screen on the JVM, once per language.
  *
- * `./gradlew recordRoborazziDebug` writes the images to app/screenshots/; a
- * plain `./gradlew test` renders them without saving, which still catches a
+ * `./gradlew recordRoborazziDebug` writes the images to app/screenshots/<lang>/;
+ * a plain `./gradlew test` renders them without saving, which still catches a
  * screen that crashes. The wave is drawn at a fixed moment so images only
- * change when the design does.
+ * change when the design does, and the longer Russian text shows whether
+ * anything overflows.
  */
-@RunWith(RobolectricTestRunner::class)
-@GraphicsMode(GraphicsMode.Mode.NATIVE)
-@Config(sdk = [36], qualifiers = "w393dp-h852dp-xxhdpi")
-class ScreenshotTest {
+abstract class ScreenshotTest(private val language: String) {
     @get:Rule
     val compose = createComposeRule()
 
@@ -37,9 +36,9 @@ class ScreenshotTest {
         running: Boolean = true,
         link: LinkState = LinkState.Connected("Studio PC", TransportKind.WIFI, 12),
         level: Float = 0.35f,
-        micError: String? = null,
+        micUnavailable: Boolean = false,
         pairing: Pairing? = pc,
-    ) = ScreenState(running, link, level, micError, pairing, noiseSuppression = false)
+    ) = ScreenState(running, link, level, micUnavailable, pairing, noiseSuppression = false)
 
     private fun shot(name: String, state: ScreenState, settings: Boolean = false) {
         compose.setContent {
@@ -51,7 +50,8 @@ class ScreenshotTest {
             }
         }
         compose.mainClock.advanceTimeBy(1_000)
-        if (settings) captureScreenRoboImage("screenshots/$name.png") else compose.onRoot().captureRoboImage("screenshots/$name.png")
+        val file = "screenshots/$language/$name.png"
+        if (settings) captureScreenRoboImage(file) else compose.onRoot().captureRoboImage(file)
     }
 
     @Test fun live() = shot("1-live", state())
@@ -62,14 +62,21 @@ class ScreenshotTest {
 
     @Test fun connecting() = shot("4-connecting", state(link = LinkState.Searching("Studio PC"), level = 0.02f))
 
-    @Test fun problem() = shot("5-problem", state(link = LinkState.Problem("К компьютеру уже подключён другой телефон")))
+    @Test fun problem() = shot("5-problem", state(link = LinkState.Problem(Refusal.Busy)))
 
-    @Test fun micDenied() = shot(
-        "6-mic-denied",
-        state(micError = "Не удалось открыть микрофон. Разблокируйте телефон и включите микрофон заново."),
-    )
+    @Test fun micDenied() = shot("6-mic-denied", state(micUnavailable = true))
 
     @Test fun unpaired() = shot("7-unpaired", state(running = false, link = LinkState.Off, pairing = null))
 
     @Test fun settings() = shot("8-settings", state(running = false, link = LinkState.Off), settings = true)
 }
+
+@RunWith(RobolectricTestRunner::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+@Config(sdk = [36], qualifiers = "en-w393dp-h852dp-xxhdpi")
+class ScreenshotTestEnglish : ScreenshotTest("en")
+
+@RunWith(RobolectricTestRunner::class)
+@GraphicsMode(GraphicsMode.Mode.NATIVE)
+@Config(sdk = [36], qualifiers = "ru-w393dp-h852dp-xxhdpi")
+class ScreenshotTestRussian : ScreenshotTest("ru")

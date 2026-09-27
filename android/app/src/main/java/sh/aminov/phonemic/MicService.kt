@@ -28,7 +28,7 @@ import sh.aminov.phonemic.audio.MicSource
 import sh.aminov.phonemic.audio.MicState
 import sh.aminov.phonemic.audio.ToneSource
 import sh.aminov.phonemic.data.Prefs
-import sh.aminov.phonemic.net.TransportKind
+import sh.aminov.phonemic.ui.Texts
 
 /**
  * Owns the microphone while it is switched on. Being a foreground service is
@@ -70,9 +70,11 @@ class MicService : Service() {
         running.value = true
 
         scope.launch {
-            combine(MicState.link, MicState.micError) { link, error -> link to error }.collect { (link, error) ->
-                getSystemService(NotificationManager::class.java).notify(NOTIFICATION_ID, buildNotification(link, error))
-            }
+            combine(MicState.link, MicState.micUnavailable) { link, micUnavailable -> link to micUnavailable }
+                .collect { (link, micUnavailable) ->
+                    getSystemService(NotificationManager::class.java)
+                        .notify(NOTIFICATION_ID, buildNotification(link, micUnavailable))
+                }
         }
         return START_NOT_STICKY
     }
@@ -109,7 +111,7 @@ class MicService : Service() {
         wifiLocks.forEach { it.acquire() }
     }
 
-    private fun buildNotification(link: LinkState, micError: String? = null): Notification {
+    private fun buildNotification(link: LinkState, micUnavailable: Boolean = false): Notification {
         val manager = getSystemService(NotificationManager::class.java)
         if (manager.getNotificationChannel(CHANNEL_ID) == null) {
             manager.createNotificationChannel(
@@ -125,7 +127,7 @@ class MicService : Service() {
         return NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_mic)
             .setContentTitle(getString(R.string.notification_title))
-            .setContentText(micError ?: describe(link))
+            .setContentText(if (micUnavailable) getString(R.string.mic_unavailable_detail) else describe(link))
             .setContentIntent(open)
             .setOngoing(true)
             .setSilent(true)
@@ -155,15 +157,13 @@ class MicService : Service() {
             context.stopService(Intent(context, MicService::class.java))
         }
 
-        fun describe(link: LinkState): String = when (link) {
-            LinkState.Off -> "Выключен"
-            is LinkState.Searching -> "Ищу «${link.pcName}»…"
-            is LinkState.Connected -> buildString {
-                append("Передаю на «${link.pcName}» · ")
-                append(if (link.transport == TransportKind.USB) "USB" else "Wi-Fi")
-                link.rttMs?.let { append(" · $it мс") }
-            }
-            is LinkState.Problem -> link.message
-        }
+    }
+
+    private fun describe(link: LinkState): String = when (link) {
+        LinkState.Off -> getString(R.string.notification_off)
+        is LinkState.Searching -> getString(R.string.notification_searching, Texts.pcName(this, link.pcName))
+        is LinkState.Connected ->
+            getString(R.string.notification_streaming, Texts.pcName(this, link.pcName), Texts.link(this, link))
+        is LinkState.Problem -> Texts.refusal(this, link.refusal)
     }
 }

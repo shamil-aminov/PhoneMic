@@ -28,12 +28,26 @@ CI runs exactly these on every push and pull request.
 ## Looking at the UI without a device
 
 - **Phone:** `./gradlew recordRoborazziDebug` renders every state of the main
-  screen on the JVM into `android/app/screenshots/`. Changing the design means
+  screen on the JVM, in both languages, into `android/app/screenshots/`. Changing the design means
   re-recording them and committing the images with the code.
 - **PC:** `PhoneMic.exe --preview` opens the window streaming a made-up phone,
   and `--preview=pairing` opens it waiting for one. The preview does no audio or
   networking and never saves settings, so it runs safely next to a real
   instance.
+
+## Translations
+
+Both apps are in English and Russian, and every piece of text exists in both.
+
+- **Phone:** `android/app/src/main/res/values/strings.xml` is English, the
+  default; `values-ru/strings.xml` is Russian. Lint fails the build on a string
+  missing from either.
+- **PC:** `desktop/src/PhoneMic/Text.cs` holds each string as an English and
+  Russian pair on one line. Run with `--lang=en` or `--lang=ru` to see either
+  regardless of the Windows language.
+
+The screenshot tests render both languages, which is the quickest way to see
+whether a longer translation overflows.
 
 ## Guidelines
 

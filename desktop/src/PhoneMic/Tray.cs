@@ -14,14 +14,14 @@ public sealed class Tray : IDisposable
     public Tray(Action show, Action exit)
     {
         var menu = new Forms.ContextMenuStrip();
-        menu.Items.Add("Открыть PhoneMic", null, (_, _) => show());
+        menu.Items.Add(PhoneMic.Text.TrayOpen, null, (_, _) => show());
         menu.Items.Add(new Forms.ToolStripSeparator());
-        menu.Items.Add("Выход", null, (_, _) => exit());
+        menu.Items.Add(PhoneMic.Text.TrayExit, null, (_, _) => exit());
 
         _icon = new Forms.NotifyIcon
         {
             Icon = _idle,
-            Text = "PhoneMic — ожидание телефона",
+            Text = PhoneMic.Text.TrayWaiting,
             ContextMenuStrip = menu,
             Visible = true,
         };
@@ -34,7 +34,7 @@ public sealed class Tray : IDisposable
     public void SetConnected(SessionInfo? session)
     {
         _icon.Icon = session == null ? _idle : _live;
-        var text = session == null ? "PhoneMic — ожидание телефона" : $"PhoneMic — {session.DeviceName}";
+        var text = session == null ? PhoneMic.Text.TrayWaiting : $"PhoneMic — {session.DeviceName}";
         _icon.Text = text.Length > 63 ? text[..63] : text;
     }
 

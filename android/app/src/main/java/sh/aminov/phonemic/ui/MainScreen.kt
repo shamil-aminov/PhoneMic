@@ -51,8 +51,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -72,7 +74,7 @@ data class ScreenState(
     val running: Boolean,
     val link: LinkState,
     val level: Float,
-    val micError: String?,
+    val micUnavailable: Boolean,
     val pairing: Pairing?,
     val noiseSuppression: Boolean,
 )
@@ -105,7 +107,7 @@ fun MainScreen(
                 IconButton(onClick = { settingsOpen = true }) {
                     Icon(
                         painterResource(R.drawable.ic_settings),
-                        contentDescription = "Настройки",
+                        contentDescription = stringResource(R.string.settings),
                         tint = Palette.TextFaint,
                         modifier = Modifier.size(22.dp),
                     )
@@ -119,6 +121,7 @@ fun MainScreen(
                     PairingPrompt(onScan)
                 } else {
                     val haptics = LocalHapticFeedback.current
+                    val toggleLabel = stringResource(if (state.running) R.string.turn_mic_off else R.string.turn_mic_on)
                     Wave(
                         mode = status.wave,
                         level = state.level,
@@ -134,9 +137,7 @@ fun MainScreen(
                                 haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                                 onToggle()
                             }
-                            .semantics {
-                                contentDescription = if (state.running) "Выключить микрофон" else "Включить микрофон"
-                            },
+                            .semantics { contentDescription = toggleLabel },
                     )
                 }
             }
@@ -174,22 +175,36 @@ private data class Status(
     val pulsing: Boolean,
 )
 
-private fun describe(s: ScreenState): Status = when {
-    s.pairing == null -> Status(
-        "Нет компьютера", "Отсканируйте QR-код в программе PhoneMic на компьютере",
-        Palette.TextFaint, Palette.TextDim, WaveMode.Off, false,
-    )
-    !s.running -> Status(
-        "Микрофон выключен", "Коснитесь волны, чтобы включить",
-        Palette.Off, Palette.TextDim, WaveMode.Off, false,
-    )
-    s.micError != null -> Status("Нет доступа к микрофону", s.micError, Palette.Off, Palette.Off, WaveMode.Waiting, false)
-    s.link is LinkState.Problem -> Status("Не подключено", s.link.message, Palette.Pending, Palette.Pending, WaveMode.Waiting, true)
-    s.link is LinkState.Connected -> Status(
-        "Микрофон включён", "Коснитесь волны, чтобы выключить",
-        Palette.On, Palette.TextDim, WaveMode.Live, false,
-    )
-    else -> Status("Подключаюсь…", "Ищу «${s.pairing.pcName}» по USB и Wi-Fi", Palette.Pending, Palette.TextDim, WaveMode.Waiting, true)
+@Composable
+private fun describe(s: ScreenState): Status {
+    val context = LocalContext.current
+    return when {
+        s.pairing == null -> Status(
+            stringResource(R.string.status_no_pc), stringResource(R.string.status_no_pc_detail),
+            Palette.TextFaint, Palette.TextDim, WaveMode.Off, false,
+        )
+        !s.running -> Status(
+            stringResource(R.string.status_off), stringResource(R.string.status_off_detail),
+            Palette.Off, Palette.TextDim, WaveMode.Off, false,
+        )
+        s.micUnavailable -> Status(
+            stringResource(R.string.status_mic_unavailable), stringResource(R.string.mic_unavailable_detail),
+            Palette.Off, Palette.Off, WaveMode.Waiting, false,
+        )
+        s.link is LinkState.Problem -> Status(
+            stringResource(R.string.status_refused), Texts.refusal(context, s.link.refusal),
+            Palette.Pending, Palette.Pending, WaveMode.Waiting, true,
+        )
+        s.link is LinkState.Connected -> Status(
+            stringResource(R.string.status_live), stringResource(R.string.status_live_detail),
+            Palette.On, Palette.TextDim, WaveMode.Live, false,
+        )
+        else -> Status(
+            stringResource(R.string.status_connecting),
+            stringResource(R.string.status_connecting_detail, Texts.pcName(context, s.pairing.pcName)),
+            Palette.Pending, Palette.TextDim, WaveMode.Waiting, true,
+        )
+    }
 }
 
 @Composable
@@ -212,6 +227,8 @@ private fun StatusHeader(status: Status) {
             color = status.detailColor,
             fontSize = 14.sp,
             textAlign = TextAlign.Center,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
             // Room for two lines, so the wave does not jump when the text changes.
             modifier = Modifier.height(48.dp),
         )
@@ -237,15 +254,14 @@ private fun StatusDot(color: Color, pulsing: Boolean) {
 @Composable
 private fun ComputerIsland(state: ScreenState, onScan: () -> Unit, modifier: Modifier = Modifier) {
     val link = state.link
+    val context = LocalContext.current
     val detail = when {
-        !state.running -> "Не подключён"
-        link is LinkState.Connected -> buildString {
-            append(if (link.transport == TransportKind.USB) "USB" else "Wi-Fi")
-            link.rttMs?.let { append(" · $it мс") }
-        }
-        link is LinkState.Problem -> "Нет связи"
-        else -> "Поиск…"
+        !state.running -> stringResource(R.string.island_off)
+        link is LinkState.Connected -> Texts.link(context, link)
+        link is LinkState.Problem -> stringResource(R.string.island_refused)
+        else -> stringResource(R.string.island_searching)
     }
+    val changeLabel = stringResource(R.string.change_computer)
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
@@ -266,7 +282,7 @@ private fun ComputerIsland(state: ScreenState, onScan: () -> Unit, modifier: Mod
         Spacer(Modifier.width(14.dp))
         Column(Modifier.weight(1f)) {
             Text(
-                state.pairing?.pcName.orEmpty(),
+                Texts.pcName(context, state.pairing?.pcName.orEmpty()),
                 color = Palette.Text,
                 fontSize = 15.sp,
                 fontWeight = FontWeight.SemiBold,
@@ -282,7 +298,7 @@ private fun ComputerIsland(state: ScreenState, onScan: () -> Unit, modifier: Mod
                 .clip(CircleShape)
                 .background(Palette.Control)
                 .clickable(onClick = onScan)
-                .semantics { contentDescription = "Сменить компьютер" },
+                .semantics { contentDescription = changeLabel },
         ) {
             Icon(painterResource(R.drawable.ic_qr), contentDescription = null, tint = Palette.Text, modifier = Modifier.size(20.dp))
         }
@@ -305,7 +321,7 @@ private fun PairingPrompt(onScan: () -> Unit) {
     ) {
         Icon(
             painterResource(R.drawable.ic_qr),
-            contentDescription = "Сканировать QR-код",
+            contentDescription = stringResource(R.string.scan_qr),
             tint = Palette.TextFaint,
             modifier = Modifier.size(88.dp),
         )
@@ -326,7 +342,7 @@ private fun ScanButton(onScan: () -> Unit, modifier: Modifier = Modifier) {
     ) {
         Icon(painterResource(R.drawable.ic_qr), contentDescription = null, tint = Color.Black, modifier = Modifier.size(20.dp))
         Spacer(Modifier.width(10.dp))
-        Text("Сканировать QR-код", color = Color.Black, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+        Text(stringResource(R.string.scan_qr), color = Color.Black, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
     }
 }
 
@@ -347,11 +363,11 @@ private fun SettingsSheet(
         scrimColor = Color.Black.copy(alpha = 0.6f),
     ) {
         Column(Modifier.padding(horizontal = 24.dp).padding(bottom = 24.dp)) {
-            Text("Настройки", color = Palette.Text, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
+            Text(stringResource(R.string.settings), color = Palette.Text, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.height(20.dp))
             SheetRow(
-                title = "Шумоподавление",
-                subtitle = "Системное подавление шума и эха телефона",
+                title = stringResource(R.string.noise_suppression),
+                subtitle = stringResource(R.string.noise_suppression_detail),
                 onClick = { onNoiseSuppressionChange(!noiseSuppression) },
             ) {
                 Switch(
@@ -366,11 +382,15 @@ private fun SettingsSheet(
                     ),
                 )
             }
-            SheetRow(title = "Компьютер", subtitle = pcName ?: "Не выбран", onClick = onChangeComputer) {
-                Text("Сменить", color = Palette.Cyan, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+            SheetRow(
+                title = stringResource(R.string.computer),
+                subtitle = pcName?.let { Texts.pcName(LocalContext.current, it) } ?: stringResource(R.string.computer_none),
+                onClick = onChangeComputer,
+            ) {
+                Text(stringResource(R.string.change), color = Palette.Cyan, fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
             }
             Spacer(Modifier.height(16.dp))
-            Text("PhoneMic $version", color = Palette.TextFaint, fontSize = 12.sp)
+            Text(stringResource(R.string.version, version), color = Palette.TextFaint, fontSize = 12.sp)
         }
     }
 }
@@ -403,7 +423,7 @@ private fun PreviewLive() {
                 running = true,
                 link = LinkState.Connected("Studio PC", TransportKind.WIFI, 12),
                 level = 0.3f,
-                micError = null,
+                micUnavailable = false,
                 pairing = Pairing(listOf("192.168.1.2"), 50505, "T", "Studio PC"),
                 noiseSuppression = false,
             ),

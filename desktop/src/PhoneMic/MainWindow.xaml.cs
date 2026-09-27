@@ -83,8 +83,8 @@ public partial class MainWindow : Window
         image.EndInit();
         QrImage.Source = image;
         AddressText.Text = addresses.Count == 0
-            ? "Компьютер не подключён к сети"
-            : $"{string.Join(", ", addresses)} · порт {_engine.Settings.Port}";
+            ? Text.NoNetwork
+            : $"{string.Join(", ", addresses)} · {Text.Port(_engine.Settings.Port)}";
         Log.Info($"Pairing QR: {uri}");
     }
 
@@ -94,7 +94,7 @@ public partial class MainWindow : Window
         _previewStart = DateTime.UtcNow;
         if (!live) return;
         ShowSession(new SessionInfo("Pixel 8", Transport.Usb, new System.Net.IPEndPoint(System.Net.IPAddress.Loopback, 0), 48000));
-        StatsText.Text = $"Буфер 32 мс · потери {0.0:F1}%";
+        StatsText.Text = Text.Stats(32, 0);
     }
 
     private void ShowSession(SessionInfo? session)
@@ -108,13 +108,13 @@ public partial class MainWindow : Window
         StatusDot.Fill = dot;
         StatusHalo.Fill = dot;
         StatusText.Foreground = (Brush)FindResource(live ? "Text" : "TextDim");
-        StatusText.Text = live ? "Подключено" : "Ожидание телефона";
+        StatusText.Text = live ? Text.Connected : Text.WaitingForPhone;
 
         if (session != null)
         {
             DeviceNameText.Text = session.DeviceName;
             TransportText.Text = session.Transport == Transport.Usb
-                ? "USB-кабель"
+                ? Text.UsbCable
                 : $"Wi-Fi · {session.Remote.Address}";
         }
         else
@@ -144,8 +144,8 @@ public partial class MainWindow : Window
         var clipping = DateTime.UtcNow < _clippedUntil;
         StatsText.Foreground = (Brush)FindResource(clipping ? "Error" : "TextDim");
         StatsText.Text = clipping
-            ? "Перегруз: уменьшите громкость"
-            : $"Буфер {_engine.Buffer.TargetMs:F0} мс · потери {lossPercent:F1}%";
+            ? Text.Clipping
+            : Text.Stats(_engine.Buffer.TargetMs, lossPercent);
     }
 
     private void LoadDevices()
@@ -161,15 +161,20 @@ public partial class MainWindow : Window
         UpdateDeviceHint(null);
     }
 
-    private void UpdateDeviceHint(string? error)
+    private void UpdateDeviceHint(OutputError? error)
     {
         var device = DeviceBox.SelectedItem as OutputDevice;
         DeviceHint.Foreground = (Brush)FindResource(error != null || device == null ? "Warn" : "TextDim");
-        DeviceHint.Text = error ?? device switch
+        DeviceHint.Text = error switch
         {
-            null => "Выберите устройство, иначе звук никуда не пойдёт.",
-            { IsVirtualCable: true } => "В Discord, Zoom, OBS и других программах выберите микрофон «CABLE Output».",
-            _ => "Звук телефона будет слышен в этом устройстве. Чтобы программы видели его как микрофон, выберите «CABLE Input».",
+            OutputError.OpenFailed => Text.OutputOpenFailed,
+            OutputError.Disconnected => Text.OutputLost,
+            _ => device switch
+            {
+                null => Text.NoDevice,
+                { IsVirtualCable: true } => Text.CableChosen,
+                _ => Text.OtherDeviceChosen,
+            },
         };
     }
 
@@ -197,9 +202,9 @@ public partial class MainWindow : Window
         if (mode != _engine.Settings.BufferMode) _engine.SetBufferMode(mode);
         ModeHint.Text = mode switch
         {
-            BufferMode.LowLatency => "Задержка 20–40 мс. Для USB и отличного Wi-Fi, на плохом будут щелчки.",
-            BufferMode.Stable => "Задержка около 100–150 мс, зато без обрывов даже на плохом Wi-Fi.",
-            _ => "Сам подстраивается под сеть. Подходит почти всегда.",
+            BufferMode.LowLatency => Text.ModeLowHint,
+            BufferMode.Stable => Text.ModeStableHint,
+            _ => Text.ModeBalancedHint,
         };
     }
 
@@ -210,8 +215,8 @@ public partial class MainWindow : Window
     {
         var answer = MessageBox.Show(
             this,
-            "Появится новый QR-код, а телефоны, сопряжённые раньше, перестанут подключаться, пока не отсканируют его.",
-            "Сбросить сопряжение?", MessageBoxButton.OKCancel, MessageBoxImage.Question);
+            Text.ResetPairingExplained,
+            Text.ResetPairingQuestion, MessageBoxButton.OKCancel, MessageBoxImage.Question);
         if (answer != MessageBoxResult.OK) return;
         _engine.ResetPairing();
         RefreshQr();

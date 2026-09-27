@@ -3,6 +3,12 @@ using NAudio.Wave;
 
 namespace PhoneMic.Core;
 
+public enum OutputError
+{
+    OpenFailed,
+    Disconnected,
+}
+
 public sealed record OutputDevice(string Id, string Name)
 {
     /// <summary>VB-Audio Virtual Cable's playback side, which other apps see as the microphone "CABLE Output".</summary>
@@ -22,7 +28,8 @@ public sealed class AudioOutput : IDisposable
 
     public AudioOutput(JitterBuffer buffer) => _buffer = buffer;
 
-    public event Action<string?>? ErrorChanged;
+    /// <summary>Null once the device plays again.</summary>
+    public event Action<OutputError?>? ErrorChanged;
 
     public string? DeviceId
     {
@@ -62,7 +69,7 @@ public sealed class AudioOutput : IDisposable
             catch (Exception e)
             {
                 Log.Error($"Starting output {deviceId}", e);
-                ErrorChanged?.Invoke("Не удалось открыть устройство вывода");
+                ErrorChanged?.Invoke(OutputError.OpenFailed);
                 ScheduleRetry();
             }
         }
@@ -72,7 +79,7 @@ public sealed class AudioOutput : IDisposable
     {
         if (e.Exception == null) return;
         Log.Error("Output stopped", e.Exception);
-        ErrorChanged?.Invoke("Устройство вывода отключилось, переподключаюсь…");
+        ErrorChanged?.Invoke(OutputError.Disconnected);
         ScheduleRetry();
     }
 

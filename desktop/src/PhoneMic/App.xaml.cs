@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Net.Sockets;
 using System.Windows;
 using PhoneMic.Core;
@@ -17,6 +18,14 @@ public partial class App : Application
     protected override void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
+        if (e.Args.FirstOrDefault(a => a.StartsWith("--lang=")) is { } lang)
+        {
+            // Numbers too, so "--lang=en" on a Russian Windows does not write "0,0%".
+            Text.Russian = lang == "--lang=ru";
+            var culture = CultureInfo.GetCultureInfo(Text.Russian ? "ru-RU" : "en-US");
+            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentUICulture = culture;
+            CultureInfo.CurrentCulture = CultureInfo.CurrentUICulture = culture;
+        }
 
         if (e.Args.FirstOrDefault(a => a.StartsWith("--preview")) is { } preview)
         {
@@ -45,7 +54,7 @@ public partial class App : Application
         {
             Log.Error("Starting server", ex);
             MessageBox.Show(
-                "Порт 50505 уже занят другой программой. Закройте её и запустите PhoneMic снова.",
+                Text.PortBusy(Protocol.DefaultPort),
                 "PhoneMic", MessageBoxButton.OK, MessageBoxImage.Error);
             Shutdown();
             return;
@@ -54,7 +63,7 @@ public partial class App : Application
         _tray = new Tray(ShowWindow, ExitApp);
         _tray.SetConnected(_engine.Server.Current);
         _window = new MainWindow(_engine);
-        _window.HiddenToTray += () => _tray.ShowHint("PhoneMic продолжает работать здесь. Выход — через меню значка.");
+        _window.HiddenToTray += () => _tray.ShowHint(Text.StillRunning);
         _engine.Server.SessionChanged += s => Dispatcher.BeginInvoke(() => _tray.SetConnected(s));
 
         if (!e.Args.Contains("--minimized")) ShowWindow();

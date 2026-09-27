@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Status line above the wave -->
+    <string name="status_no_pc">Нет компьютера</string>
+    <string name="status_no_pc_detail">Отсканируйте QR-код в программе PhoneMic на компьютере</string>
+    <string name="status_off">Микрофон выключен</string>
+    <string name="status_off_detail">Коснитесь волны, чтобы включить</string>
+    <string name="status_connecting">Подключаюсь…</string>
+    <string name="status_connecting_detail">Ищу «%1$s» по USB и Wi-Fi</string>
+    <string name="status_live">Микрофон включён</string>
+    <string name="status_live_detail">Коснитесь волны, чтобы выключить</string>
+    <string name="status_refused">Не подключено</string>
+    <string name="status_mic_unavailable">Нет доступа к микрофону</string>
+    <string name="mic_unavailable_detail">Не удалось открыть микрофон. Разблокируйте телефон и включите снова.</string>
+    <string name="refused_wrong_token">Компьютер не узнал телефон. Отсканируйте QR-код заново.</string>
+    <string name="refused_busy">К компьютеру уже подключён другой телефон</string>
+
+    <!-- The island with the paired computer -->
+    <string name="island_off">Не подключён</string>
+    <string name="island_searching">Поиск…</string>
+    <string name="island_refused">Нет связи</string>
+    <string name="link_with_rtt">%1$s · %2$d мс</string>
+    <string name="computer_unnamed">Компьютер</string>
+
+    <!-- Buttons and settings -->
+    <string name="scan_qr">Сканировать QR-код</string>
+    <string name="change_computer">Сменить компьютер</string>
+    <string name="turn_mic_on">Включить микрофон</string>
+    <string name="turn_mic_off">Выключить микрофон</string>
+    <string name="settings">Настройки</string>
+    <string name="noise_suppression">Шумоподавление</string>
+    <string name="noise_suppression_detail">Системное подавление шума и эха телефона</string>
+    <string name="computer">Компьютер</string>
+    <string name="computer_none">Не выбран</string>
+    <string name="change">Сменить</string>
+    <string name="version">PhoneMic %1$s</string>
+
+    <!-- Notification while streaming -->
+    <string name="channel_name">Микрофон</string>
+    <string name="notification_title">Микрофон включён</string>
+    <string name="turn_off">Выключить</string>
+    <string name="notification_off">Выключен</string>
+    <string name="notification_searching">Ищу «%1$s»…</string>
+    <string name="notification_streaming">Передаю на «%1$s» · %2$s</string>
+
+    <!-- Messages -->
+    <string name="mic_permission_needed">Без доступа к микрофону приложение не может работать</string>
+    <string name="not_a_phonemic_code">Это не QR-код PhoneMic</string>
+    <string name="scanner_failed">Не удалось открыть сканер QR-кодов</string>
+    <string name="paired_with">Компьютер «%1$s» сохранён</string>
+</resources>

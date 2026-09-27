@@ -24,16 +24,19 @@ sealed interface LinkState {
     data object Off : LinkState
     data class Searching(val pcName: String) : LinkState
     data class Connected(val pcName: String, val transport: TransportKind, val rttMs: Int?) : LinkState
-    data class Problem(val message: String) : LinkState
+    data class Problem(val refusal: Refusal) : LinkState
 }
+
+/** Why the PC turned the phone away. The UI puts it into words. */
+enum class Refusal { WrongToken, Busy }
 
 /** Live state shared by the service, its notification and the UI. */
 object MicState {
     val link = MutableStateFlow<LinkState>(LinkState.Off)
     val level = MutableStateFlow(0f)
 
-    /** Set while the microphone cannot be opened, e.g. during a phone call. */
-    val micError = MutableStateFlow<String?>(null)
+    /** True while the microphone cannot be opened, e.g. during a phone call. */
+    val micUnavailable = MutableStateFlow(false)
 }
 
 private const val TAG = "MicEngine"
@@ -90,7 +93,7 @@ class MicEngine(
         linkThread?.join(2000)
         if (current === this) {
             MicState.level.value = 0f
-            MicState.micError.value = null
+            MicState.micUnavailable.value = false
         }
     }
 
@@ -107,12 +110,11 @@ class MicEngine(
                 Log.w(TAG, "Microphone unavailable", e)
                 // Android refuses when another app holds the mic (a call) or when the service was
                 // started while the phone was locked. Keep retrying: the first case clears up by itself.
-                MicState.micError.value = "Не удалось открыть микрофон. Если телефон был заблокирован, " +
-                    "разблокируйте его и включите микрофон заново."
+                MicState.micUnavailable.value = true
                 SystemClock.sleep(2000)
                 continue
             }
-            MicState.micError.value = null
+            MicState.micUnavailable.value = false
             source.use {
                 while (running) {
                     if (!source.read(frame)) {
@@ -145,7 +147,7 @@ class MicEngine(
                 val transport = try {
                     connect(session)
                 } catch (e: Rejected) {
-                    MicState.link.value = LinkState.Problem(e.message!!)
+                    MicState.link.value = LinkState.Problem(e.refusal)
                     SystemClock.sleep(3000)
                     null
                 }
@@ -240,7 +242,7 @@ class MicEngine(
         @Volatile var current: MicEngine? = null
     }
 
-    private class Rejected(message: String) : Exception(message)
+    private class Rejected(val refusal: Refusal) : Exception(refusal.name)
 
     private fun hello(writer: PacketWriter, session: Int) =
         writer.begin(Protocol.HELLO, session)
@@ -250,8 +252,8 @@ class MicEngine(
         val status = p.u8()
         return when (status) {
             Protocol.STATUS_OK -> true
-            Protocol.STATUS_BAD_TOKEN -> throw Rejected("Компьютер не узнал телефон. Отсканируйте QR-код заново.")
-            Protocol.STATUS_BUSY -> throw Rejected("К компьютеру уже подключён другой телефон")
+            Protocol.STATUS_BAD_TOKEN -> throw Rejected(Refusal.WrongToken)
+            Protocol.STATUS_BUSY -> throw Rejected(Refusal.Busy)
             else -> false
         }
     }

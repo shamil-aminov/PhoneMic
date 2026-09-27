@@ -21,7 +21,7 @@
                     <Ellipse x:Name="StatusHalo" Fill="{StaticResource TextFaint}" Opacity="0.25" />
                     <Ellipse x:Name="StatusDot" Width="7" Height="7" Fill="{StaticResource TextFaint}" />
                 </Grid>
-                <TextBlock x:Name="StatusText" Text="Ожидание телефона" FontSize="13"
+                <TextBlock x:Name="StatusText" Text="{x:Static local:Text.WaitingForPhone}" FontSize="13"
                            Foreground="{StaticResource TextDim}" VerticalAlignment="Center" />
             </StackPanel>
         </Grid>
@@ -35,13 +35,13 @@
                         <Image x:Name="QrImage" Width="216" Height="216"
                                RenderOptions.BitmapScalingMode="NearestNeighbor" />
                     </Border>
-                    <TextBlock Text="Отсканируйте код в приложении PhoneMic" FontSize="15" FontWeight="SemiBold"
+                    <TextBlock Text="{x:Static local:Text.ScanPrompt}" FontSize="15" FontWeight="SemiBold"
                                HorizontalAlignment="Center" Margin="0,16,0,4" />
                     <TextBlock x:Name="AddressText" Style="{StaticResource Hint}" HorizontalAlignment="Center"
                                TextAlignment="Center" />
                     <TextBlock Style="{StaticResource Hint}" TextAlignment="Center" Margin="0,10,0,0"
-                               Text="Телефон, подключённый кабелем с отладкой по USB, найдётся сам." />
-                    <Button x:Name="HideQrButton" Content="Скрыть QR-код" Style="{StaticResource LinkButton}"
+                               Text="{x:Static local:Text.UsbFindsItself}" />
+                    <Button x:Name="HideQrButton" Content="{x:Static local:Text.HideQr}" Style="{StaticResource LinkButton}"
                             HorizontalAlignment="Center" Margin="0,12,0,0" Visibility="Collapsed"
                             Click="HideQr_Click" />
                 </StackPanel>
@@ -72,7 +72,7 @@
                                            TextTrimming="CharacterEllipsis" />
                                 <TextBlock x:Name="TransportText" FontSize="12" Foreground="{StaticResource TextDim}" />
                             </StackPanel>
-                            <Button Grid.Column="2" Click="ShowQr_Click" ToolTip="Показать QR-код" Cursor="Hand">
+                            <Button Grid.Column="2" Click="ShowQr_Click" ToolTip="{x:Static local:Text.ShowQr}" Cursor="Hand">
                                 <Button.Template>
                                     <ControlTemplate TargetType="Button">
                                         <Border x:Name="Round" Width="40" Height="40" CornerRadius="20"
@@ -101,10 +101,10 @@
         <Border x:Name="CableWarning" Style="{StaticResource Card}" BorderBrush="{StaticResource Warn}"
                 Visibility="Collapsed">
             <StackPanel>
-                <TextBlock Text="Не найден VB-Audio Virtual Cable" FontWeight="SemiBold" Foreground="{StaticResource Warn}" />
+                <TextBlock Text="{x:Static local:Text.CableMissing}" FontWeight="SemiBold" Foreground="{StaticResource Warn}" />
                 <TextBlock Style="{StaticResource Hint}" Margin="0,4,0,8"
-                           Text="Он превращает звук с телефона в микрофон, который видят Discord, Zoom и другие программы. Установите его и перезапустите PhoneMic." />
-                <Button Content="Скачать с vb-audio.com" Style="{StaticResource LinkButton}"
+                           Text="{x:Static local:Text.CableExplained}" />
+                <Button Content="{x:Static local:Text.CableDownload}" Style="{StaticResource LinkButton}"
                         HorizontalAlignment="Left" Click="DownloadCable_Click" />
             </StackPanel>
         </Border>
@@ -112,37 +112,37 @@
         <!-- Settings -->
         <Border Style="{StaticResource Card}">
             <StackPanel>
-                <TextBlock Text="Куда выводить звук" Style="{StaticResource Label}" />
+                <TextBlock Text="{x:Static local:Text.OutputDevice}" Style="{StaticResource Label}" />
                 <ComboBox x:Name="DeviceBox" SelectionChanged="DeviceBox_SelectionChanged"
                           DropDownOpened="DeviceBox_DropDownOpened" />
                 <TextBlock x:Name="DeviceHint" Style="{StaticResource Hint}" Margin="0,8,0,0" />
 
                 <Grid Margin="0,18,0,0">
-                    <TextBlock Text="Громкость" Style="{StaticResource Label}" />
+                    <TextBlock Text="{x:Static local:Text.Volume}" Style="{StaticResource Label}" />
                     <TextBlock x:Name="GainText" Style="{StaticResource Label}" HorizontalAlignment="Right" />
                 </Grid>
                 <Slider x:Name="GainSlider" Minimum="0" Maximum="400" SmallChange="5" LargeChange="25"
                         IsSnapToTickEnabled="True" TickFrequency="5" ValueChanged="GainSlider_ValueChanged" />
 
-                <TextBlock Text="Буфер" Style="{StaticResource Label}" Margin="0,18,0,6" />
+                <TextBlock Text="{x:Static local:Text.Buffer}" Style="{StaticResource Label}" Margin="0,18,0,6" />
                 <UniformGrid Rows="1" Margin="-2,0">
-                    <RadioButton x:Name="ModeLow" Content="Мин. задержка" GroupName="Mode" Style="{StaticResource Segment}"
+                    <RadioButton x:Name="ModeLow" Content="{x:Static local:Text.ModeLow}" GroupName="Mode" Style="{StaticResource Segment}"
                                  Checked="Mode_Checked" />
-                    <RadioButton x:Name="ModeBalanced" Content="Баланс" GroupName="Mode" Style="{StaticResource Segment}"
+                    <RadioButton x:Name="ModeBalanced" Content="{x:Static local:Text.ModeBalanced}" GroupName="Mode" Style="{StaticResource Segment}"
                                  Checked="Mode_Checked" />
-                    <RadioButton x:Name="ModeStable" Content="Надёжный" GroupName="Mode" Style="{StaticResource Segment}"
+                    <RadioButton x:Name="ModeStable" Content="{x:Static local:Text.ModeStable}" GroupName="Mode" Style="{StaticResource Segment}"
                                  Checked="Mode_Checked" />
                 </UniformGrid>
                 <TextBlock x:Name="ModeHint" Style="{StaticResource Hint}" Margin="0,8,0,0" />
 
-                <CheckBox x:Name="AutostartBox" Content="Запускать вместе с Windows" Margin="0,14,0,0"
+                <CheckBox x:Name="AutostartBox" Content="{x:Static local:Text.StartWithWindows}" Margin="0,14,0,0"
                           Checked="AutostartBox_Changed" Unchecked="AutostartBox_Changed" />
 
                 <Grid Margin="0,14,0,0">
-                    <Button x:Name="ResetButton" Content="Сбросить сопряжение" HorizontalAlignment="Left"
+                    <Button x:Name="ResetButton" Content="{x:Static local:Text.ResetPairing}" HorizontalAlignment="Left"
                             Click="Reset_Click"
-                            ToolTip="Новый QR-код. Телефоны, сопряжённые раньше, перестанут подключаться." />
-                    <Button Content="Открыть журнал" Style="{StaticResource LinkButton}" HorizontalAlignment="Right"
+                            ToolTip="{x:Static local:Text.ResetPairingTip}" />
+                    <Button Content="{x:Static local:Text.OpenLog}" Style="{StaticResource LinkButton}" HorizontalAlignment="Right"
                             VerticalAlignment="Center" Click="OpenLog_Click" />
                 </Grid>
             </StackPanel>

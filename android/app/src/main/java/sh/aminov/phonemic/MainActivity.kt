@@ -26,6 +26,7 @@ import sh.aminov.phonemic.data.Prefs
 import sh.aminov.phonemic.ui.MainScreen
 import sh.aminov.phonemic.ui.PhoneMicTheme
 import sh.aminov.phonemic.ui.ScreenState
+import sh.aminov.phonemic.ui.Texts
 
 class MainActivity : ComponentActivity() {
     private lateinit var prefs: Prefs
@@ -60,14 +61,14 @@ class MainActivity : ComponentActivity() {
             val running by MicService.running.collectAsStateWithLifecycle()
             val link by MicState.link.collectAsStateWithLifecycle()
             val level by MicState.level.collectAsStateWithLifecycle()
-            val micError by MicState.micError.collectAsStateWithLifecycle()
+            val micUnavailable by MicState.micUnavailable.collectAsStateWithLifecycle()
             PhoneMicTheme {
                 MainScreen(
                     state = ScreenState(
                         running = running,
                         link = link,
                         level = level,
-                        micError = micError,
+                        micUnavailable = micUnavailable,
                         pairing = pairing,
                         noiseSuppression = noiseSuppression,
                     ),
@@ -116,7 +117,7 @@ class MainActivity : ComponentActivity() {
             MicService.stop(this)
             window.decorView.postDelayed({ startMic() }, 300)
         }
-        Toast.makeText(this, getString(R.string.paired_with, parsed.pcName), Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, getString(R.string.paired_with, Texts.pcName(this, parsed.pcName)), Toast.LENGTH_SHORT).show()
         return true
     }
 

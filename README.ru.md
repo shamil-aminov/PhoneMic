@@ -7,7 +7,7 @@
 
 *English version: [README.md](README.md)*
 
-![Приложение на телефоне и программа на ПК во время передачи](docs/images/cover.png)
+![Приложение на телефоне и программа на ПК во время передачи](docs/images/cover-ru.png)
 
 ---
 
@@ -41,7 +41,7 @@ OBS и любые другие программы видят его как об�
 
 | Выключен | Подключение | Первый запуск |
 | :---: | :---: | :---: |
-| <img src="android/app/screenshots/3-off.png" width="220" alt="Микрофон выключен: волна — тусклая нить"> | <img src="android/app/screenshots/4-connecting.png" width="220" alt="Поиск компьютера: пульсирует жёлтая точка"> | <img src="android/app/screenshots/7-unpaired.png" width="220" alt="Компьютер ещё не выбран: предложение отсканировать QR-код"> |
+| <img src="android/app/screenshots/ru/3-off.png" width="220" alt="Микрофон выключен: волна — тусклая нить"> | <img src="android/app/screenshots/ru/4-connecting.png" width="220" alt="Поиск компьютера: пульсирует жёлтая точка"> | <img src="android/app/screenshots/ru/7-unpaired.png" width="220" alt="Компьютер ещё не выбран: предложение отсканировать QR-код"> |
 
 Волна — это и есть кнопка: коснитесь её, чтобы включить или выключить
 микрофон. Она дышит вашим голосом на телефоне, а в окне на ПК — звуком,
@@ -80,6 +80,10 @@ PhoneMic выводит звук в [VB-Audio Virtual Cable](https://vb-audio.co
   входит в Android Studio и в
   [platform tools](https://developer.android.com/tools/releases/platform-tools).
 
+Оба приложения на русском и английском и выбирают язык по системе. На
+Android 13 и новее язык приложения на телефоне можно задать отдельно в
+настройках системы.
+
 ## Начало работы
 
 1. **Установите VB-Audio Virtual Cable** и перезагрузитесь, если установщик
@@ -89,7 +93,7 @@ PhoneMic выводит звук в [VB-Audio Virtual Cable](https://vb-audio.co
 3. **Запустите программу на ПК.** Когда Windows спросит, можно ли PhoneMic
    пользоваться сетью, разрешите — иначе Wi-Fi не заработает. Появится QR-код.
 
-   <img src="docs/images/pc-pairing.png" alt="Программа на ПК ждёт телефон и показывает QR-код для сопряжения" width="360">
+   <img src="docs/images/pc-pairing-ru.png" alt="Программа на ПК ждёт телефон и показывает QR-код для сопряжения" width="360">
 
 4. **Установите приложение на телефон**, нажмите **«Сканировать»** и наведите
    камеру на QR-код.

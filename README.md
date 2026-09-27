@@ -41,7 +41,7 @@ PhoneMic is built around not doing either.
 
 | Off | Connecting | First launch |
 | :---: | :---: | :---: |
-| <img src="android/app/screenshots/3-off.png" width="220" alt="Microphone off: the wave is a dim thread"> | <img src="android/app/screenshots/4-connecting.png" width="220" alt="Looking for the PC: an amber dot pulses"> | <img src="android/app/screenshots/7-unpaired.png" width="220" alt="No PC paired yet: a prompt to scan the QR code"> |
+| <img src="android/app/screenshots/en/3-off.png" width="220" alt="Microphone off: the wave is a dim thread"> | <img src="android/app/screenshots/en/4-connecting.png" width="220" alt="Looking for the PC: an amber dot pulses"> | <img src="android/app/screenshots/en/7-unpaired.png" width="220" alt="No PC paired yet: a prompt to scan the QR code"> |
 
 The wave is the switch: tap it to turn the microphone on or off. It swells
 with your voice on the phone and, from the audio that actually arrives, in the
@@ -80,8 +80,9 @@ is the microphone you pick in other programs.
   PC — it comes with Android Studio or the
   [platform tools](https://developer.android.com/tools/releases/platform-tools).
 
-Both apps are in Russian for now. The steps below name the buttons by what
-they do.
+Both apps speak English and Russian and follow the system language. On
+Android 13 and later the phone app's language can also be set on its own in
+system settings.
 
 ## Getting started
 
@@ -93,8 +94,8 @@ they do.
 
    <img src="docs/images/pc-pairing.png" alt="The PC app waiting for a phone, with its pairing QR code" width="360">
 
-4. **Install the app on the phone**, tap **Scan** and point the camera at the
-   QR code.
+4. **Install the app on the phone**, tap **Scan QR code** and point the
+   camera at the QR code.
 5. **Tap the wave.** The dot above it turns cyan once the PC is receiving.
 6. **In Discord, Zoom or OBS**, choose **CABLE Output** as the microphone.
 
