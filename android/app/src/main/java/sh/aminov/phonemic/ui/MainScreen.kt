@@ -32,7 +32,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -103,17 +102,7 @@ fun MainScreen(
                 .safeDrawingPadding(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp), horizontalArrangement = Arrangement.End) {
-                IconButton(onClick = { settingsOpen = true }) {
-                    Icon(
-                        painterResource(R.drawable.ic_settings),
-                        contentDescription = stringResource(R.string.settings),
-                        tint = Palette.TextFaint,
-                        modifier = Modifier.size(22.dp),
-                    )
-                }
-            }
-
+            Spacer(Modifier.height(40.dp))
             StatusHeader(status)
 
             Box(Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -145,7 +134,7 @@ fun MainScreen(
             if (state.pairing == null) {
                 ScanButton(onScan, Modifier.padding(bottom = 28.dp))
             } else {
-                ComputerIsland(state, onScan, Modifier.padding(bottom = 24.dp))
+                ComputerIsland(state, onScan, onSettings = { settingsOpen = true }, Modifier.padding(bottom = 24.dp))
             }
         }
     }
@@ -250,7 +239,7 @@ private fun StatusDot(color: Color, pulsing: Boolean) {
 }
 
 @Composable
-private fun ComputerIsland(state: ScreenState, onScan: () -> Unit, modifier: Modifier = Modifier) {
+private fun ComputerIsland(state: ScreenState, onScan: () -> Unit, onSettings: () -> Unit, modifier: Modifier = Modifier) {
     val link = state.link
     val context = LocalContext.current
     val detail = when {
@@ -260,6 +249,7 @@ private fun ComputerIsland(state: ScreenState, onScan: () -> Unit, modifier: Mod
         else -> stringResource(R.string.island_searching)
     }
     val changeLabel = stringResource(R.string.change_computer)
+    val settingsLabel = stringResource(R.string.settings)
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
@@ -289,17 +279,25 @@ private fun ComputerIsland(state: ScreenState, onScan: () -> Unit, modifier: Mod
             )
             Text(detail, color = Palette.TextDim, fontSize = 12.sp, maxLines = 1)
         }
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .size(44.dp)
-                .clip(CircleShape)
-                .background(Palette.Control)
-                .clickable(onClick = onScan)
-                .semantics { contentDescription = changeLabel },
-        ) {
-            Icon(painterResource(R.drawable.ic_qr), contentDescription = null, tint = Palette.Text, modifier = Modifier.size(20.dp))
-        }
+        // Every control lives here, under the thumb; the top of the screen is status only.
+        IslandButton(R.drawable.ic_settings, settingsLabel, onSettings)
+        Spacer(Modifier.width(6.dp))
+        IslandButton(R.drawable.ic_qr, changeLabel, onScan)
+    }
+}
+
+@Composable
+private fun IslandButton(icon: Int, label: String, onClick: () -> Unit) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .size(44.dp)
+            .clip(CircleShape)
+            .background(Palette.Control)
+            .clickable(onClick = onClick)
+            .semantics { contentDescription = label },
+    ) {
+        Icon(painterResource(icon), contentDescription = null, tint = Palette.Text, modifier = Modifier.size(20.dp))
     }
 }
 
