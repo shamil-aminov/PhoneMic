@@ -244,10 +244,8 @@ private fun StatusDot(color: Color, pulsing: Boolean) {
     } else {
         1f
     }
-    Canvas(Modifier.size(18.dp)) {
-        // Soft halo, then the dot itself.
-        drawCircle(animated.copy(alpha = 0.22f * pulse), radius = size.minDimension / 2)
-        drawCircle(animated.copy(alpha = pulse), radius = size.minDimension / 4.5f)
+    Canvas(Modifier.size(10.dp)) {
+        drawCircle(animated.copy(alpha = pulse))
     }
 }
 

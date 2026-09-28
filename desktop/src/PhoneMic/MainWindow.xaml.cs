@@ -104,9 +104,7 @@ public partial class MainWindow : Window
         PairPanel.Visibility = live && !_qrForced ? Visibility.Collapsed : Visibility.Visible;
         HideQrButton.Visibility = live && _qrForced ? Visibility.Visible : Visibility.Collapsed;
 
-        var dot = (Brush)FindResource(live ? "Live" : "TextFaint");
-        StatusDot.Fill = dot;
-        StatusHalo.Fill = dot;
+        StatusDot.Fill = (Brush)FindResource(live ? "Live" : "TextFaint");
         StatusText.Foreground = (Brush)FindResource(live ? "Text" : "TextDim");
         StatusText.Text = live ? Text.Connected : Text.WaitingForPhone;
 
