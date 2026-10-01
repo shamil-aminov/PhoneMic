@@ -64,7 +64,8 @@ function Draw-Wave([int]$size, [System.Drawing.Color]$bg, [System.Drawing.Color]
                 $x = $j / 120.0
                 New-Object System.Drawing.PointF ([single](256 * (0.04 + 0.92 * $x))), ([single](128 + 76.8 * (Wave-Point $x $theta)))
             }
-            $pen = Wave-Pen $colors ([Math]::Min(1, $pass.Alpha * $facing)) $pass.Width
+            # 1.0, not 1: with an integer PowerShell picks Math.Min(int, int) and rounds the alpha to 0 or 1.
+            $pen = Wave-Pen $colors ([Math]::Min(1.0, $pass.Alpha * $facing)) $pass.Width
             $g.DrawLines($pen, [System.Drawing.PointF[]]$points)
             $pen.Dispose()
         }
