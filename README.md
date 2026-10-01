@@ -102,8 +102,10 @@ system settings.
 1. **Install VB-Audio Virtual Cable** and restart if its installer asks.
 2. **Download PhoneMic** from the [latest release](../../releases/latest):
    the `.apk` for the phone and `PhoneMic-…-windows-x64.exe` for the PC.
-3. **Run the PC app.** When Windows asks whether PhoneMic may use the network,
-   allow it — Wi-Fi does not work otherwise. A QR code appears.
+3. **Run the PC app.** The executable is not code-signed yet, so on first
+   launch Windows SmartScreen may say it protected your PC: click
+   **More info → Run anyway**. When Windows asks whether PhoneMic may use the
+   network, allow it — Wi-Fi does not work otherwise. A QR code appears.
 
    <img src="docs/images/pc-pairing.png" alt="The PC app waiting for a phone, with its pairing QR code" width="360">
 
