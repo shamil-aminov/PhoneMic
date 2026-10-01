@@ -8,7 +8,7 @@
     <UseWPF>true</UseWPF>
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
     <Authors>Shamil Aminov</Authors>
     <Copyright>Copyright (c) 2026 Shamil Aminov</Copyright>
     <Description>Use an Android phone as a Windows microphone</Description>
