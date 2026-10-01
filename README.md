@@ -20,7 +20,7 @@
 
 <p align="center"><i>Русская версия: <a href="README.ru.md">README.ru.md</a></i></p>
 
-![The phone app and the PC app while streaming](docs/images/cover.png)
+![The phone and the PC while streaming: both waves move with the voice](docs/images/demo.webp)
 
 ---
 

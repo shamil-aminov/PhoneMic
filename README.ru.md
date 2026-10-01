@@ -20,7 +20,7 @@
 
 <p align="center"><i>English version: <a href="README.md">README.md</a></i></p>
 
-![Приложение на телефоне и программа на ПК во время передачи](docs/images/cover-ru.png)
+![Приложение на телефоне и программа на ПК во время передачи](docs/images/demo-ru.webp)
 
 ---
 

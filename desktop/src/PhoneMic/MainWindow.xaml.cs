@@ -21,7 +21,7 @@ public partial class MainWindow : Window
     private bool _loadingDevices;
     private bool _qrForced;
     private DateTime _clippedUntil;
-    private DateTime? _previewStart;
+    private bool _preview;
 
     /// <summary>Raised the first time the window is closed into the tray.</summary>
     public event Action? HiddenToTray;
@@ -94,7 +94,7 @@ public partial class MainWindow : Window
 
     public void ShowPreview(bool live)
     {
-        _previewStart = DateTime.UtcNow;
+        _preview = true;
         if (!live) return;
         ShowSession(PreviewSession);
         StatsText.Text = Text.Stats(32, 0);
@@ -126,11 +126,9 @@ public partial class MainWindow : Window
 
     private void Tick()
     {
-        if (_previewStart is { } start)
+        if (_preview)
         {
-            // Speech-like: syllables inside phrases inside pauses.
-            var t = (DateTime.UtcNow - start).TotalSeconds;
-            Wave.Level = 0.02 + 0.5 * Math.Abs(Math.Sin(t * 5.1)) * Math.Max(0, Math.Sin(t * 0.9 + 1.2));
+            Wave.Level = DemoVoice.Level(DemoVoice.Now);
             return;
         }
         var peak = _engine.Server.TakePeak();

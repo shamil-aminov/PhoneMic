@@ -23,6 +23,7 @@ public sealed class WaveView : FrameworkElement
     private readonly Pen[] _line = new Pen[Lines];
     private readonly DateTime _start = DateTime.UtcNow;
     private double _energy;
+    private DateTime _lastFrame = DateTime.UtcNow;
 
     /// <summary>Loudest recent sample, 0..1. Set it as often as new audio arrives.</summary>
     public double Level { get; set; }
@@ -39,9 +40,13 @@ public sealed class WaveView : FrameworkElement
 
     private void OnFrame(object? sender, EventArgs e)
     {
-        // Loudness on a dB scale, rising fast and falling slowly like a meter.
+        // Loudness on a dB scale, eased over about 140 ms each way like the phone's
+        // animateFloatAsState, so the two waves rise and fall together.
+        var now = DateTime.UtcNow;
+        var dt = Math.Min((now - _lastFrame).TotalSeconds, 0.1);
+        _lastFrame = now;
         var loudness = Math.Clamp((20 * Math.Log10(Math.Max(Level, 1e-4)) + 50) / 44, 0, 1);
-        _energy += (loudness - _energy) * (loudness > _energy ? 0.35 : 0.08);
+        _energy += (loudness - _energy) * (1 - Math.Exp(-dt / 0.05));
         InvalidateVisual();
     }
 

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- **The PC wave eases like the phone's**, about 140 ms each way, instead of
+  rising fast and falling slowly, so the two screens move together.
+- **The README opens with an animation** of both screens streaming the same
+  voice, built from the apps' own rendering (`desktop/tools/demo/`).
+
 ## [1.0.1] — 2026-10-01
 
 ### Changed
