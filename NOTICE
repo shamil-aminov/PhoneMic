@@ -13,8 +13,8 @@ QRCoder (pairing QR code on the PC), https://github.com/codebude/QRCoder
 Copyright (c) Raffael Herrmann and contributors
 Licensed under the MIT License.
 --------------------------------------------------------------------------------
-Material Symbols (the icon shapes in android/app/src/main/res/drawable and the
-microphone drawn by desktop/tools/make-icons.ps1)
+Material Symbols (the icon shapes in android/app/src/main/res/drawable, except
+the launcher icon)
 Copyright Google LLC
 Licensed under the Apache License, Version 2.0.
 --------------------------------------------------------------------------------
