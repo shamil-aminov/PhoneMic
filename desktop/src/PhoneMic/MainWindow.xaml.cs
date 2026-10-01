@@ -89,11 +89,14 @@ public partial class MainWindow : Window
     }
 
     /// <summary>Made-up data for the design preview: a phone on USB, talking.</summary>
+    public static SessionInfo PreviewSession { get; } =
+        new("Pixel 8", Transport.Usb, new System.Net.IPEndPoint(System.Net.IPAddress.Loopback, 0), 48000);
+
     public void ShowPreview(bool live)
     {
         _previewStart = DateTime.UtcNow;
         if (!live) return;
-        ShowSession(new SessionInfo("Pixel 8", Transport.Usb, new System.Net.IPEndPoint(System.Net.IPAddress.Loopback, 0), 48000));
+        ShowSession(PreviewSession);
         StatsText.Text = Text.Stats(32, 0);
     }
 

@@ -86,6 +86,9 @@ public partial class App : Application
         _window = new MainWindow(_engine);
         _window.AllowClose();
         _window.Closed += (_, _) => Shutdown();
+        // The tray icon too, so its two states can be checked without a phone.
+        _tray = new Tray(ShowWindow, ExitApp);
+        _tray.SetConnected(live ? PhoneMic.MainWindow.PreviewSession : null);
         _window.ShowPreview(live);
         _window.Show();
     }

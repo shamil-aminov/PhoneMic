@@ -30,10 +30,13 @@ CI runs exactly these on every push and pull request.
 - **Phone:** `./gradlew recordRoborazziDebug` renders every state of the main
   screen on the JVM, in both languages, into `android/app/screenshots/`. Changing the design means
   re-recording them and committing the images with the code.
+- **Launcher icon:** `./gradlew test` also draws it with Android 11's and
+  Android 16's renderers, monochrome themed layer included, into
+  `android/app/build/launcher-icon/`.
 - **PC:** `PhoneMic.exe --preview` opens the window streaming a made-up phone,
-  and `--preview=pairing` opens it waiting for one. The preview does no audio or
-  networking and never saves settings, so it runs safely next to a real
-  instance.
+  and `--preview=pairing` opens it waiting for one, each with the matching
+  tray icon. The preview does no audio or networking and never saves settings,
+  so it runs safely next to a real instance.
 
 ## Translations
 
