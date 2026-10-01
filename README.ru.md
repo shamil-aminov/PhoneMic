@@ -1,11 +1,24 @@
-# PhoneMic
+<p align="center">
+  <img src="docs/images/logo.svg" width="200" alt="PhoneMic">
+</p>
 
-**Телефон на Android в роли микрофона для Windows — по Wi-Fi или по USB-кабелю.**
+<h1 align="center">PhoneMic</h1>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![CI](https://github.com/shamil-aminov/PhoneMic/actions/workflows/ci.yml/badge.svg)](https://github.com/shamil-aminov/PhoneMic/actions/workflows/ci.yml)
+<p align="center">
+  <b>Телефон на Android в роли микрофона для Windows — по Wi-Fi или по USB-кабелю.</b>
+</p>
 
-*English version: [README.md](README.md)*
+<p align="center">
+  <a href="https://github.com/shamil-aminov/PhoneMic/actions/workflows/ci.yml"><img src="https://github.com/shamil-aminov/PhoneMic/actions/workflows/ci.yml/badge.svg" alt="CI"></a>
+  <a href="https://github.com/shamil-aminov/PhoneMic/releases/latest"><img src="https://img.shields.io/github/v/release/shamil-aminov/PhoneMic?label=release&color=22D3EE" alt="Release"></a>
+  <a href="https://github.com/shamil-aminov/PhoneMic/releases"><img src="https://img.shields.io/github/downloads/shamil-aminov/PhoneMic/total?label=downloads&color=60A5FA" alt="Downloads"></a>
+  <a href="#что-нужно"><img src="https://img.shields.io/badge/Android-8.0%2B-A78BFA?logo=android&logoColor=white" alt="Android 8.0+"></a>
+  <a href="#что-нужно"><img src="https://img.shields.io/badge/Windows-10%20%7C%2011-60A5FA" alt="Windows 10 | 11"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/github/license/shamil-aminov/PhoneMic?color=22D3EE" alt="License: MIT"></a>
+  <a href="https://aminov.sh/blog/phonemic"><img src="https://img.shields.io/badge/история-aminov.sh-000000" alt="История"></a>
+</p>
+
+<p align="center"><i>English version: <a href="README.md">README.md</a></i></p>
 
 ![Приложение на телефоне и программа на ПК во время передачи](docs/images/cover-ru.png)
 
